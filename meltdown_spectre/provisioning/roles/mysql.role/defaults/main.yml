@@ -1,0 +1,11 @@
+---
+# defaults file for mysql.role
+mysql_user_home: /home/vagrant
+mysql_user_name: vagrant
+mysql_user_password: vagrant
+
+
+
+mysql_root_home: /root
+mysql_root_name: root
+mysql_root_password: root

@@ -1,0 +1,34 @@
+---
+# tasks file for drupal.role
+  - include_tasks: "setup_apache.yml"
+
+
+  - name: Install drush
+    become: yes
+    apt: "name=drush state=installed"
+  
+  
+  - name: Install php gd
+    become: yes
+    apt: "name=php5-gd state=installed"
+
+  - name: downloading the last version of drupal into a folder
+    command: >
+      drush dl drupal
+      
+  - name: Install Drupal with drush
+    command: >
+      sudo drush -y site-install --db-url=mysql://root:root@localhost:3306/drupaldb --root="/home/vagrant/drupal-7.56"
+
+  - name: Copy vhost
+    copy: src=files/000-default.conf dest=/etc/apache2/sites-available/000-default.conf
+            #owner=root group=root mode=0644
+            
+  - name: Copy ssl vhost
+    copy: src=files/default-ssl.conf dest=/etc/apache2/sites-available/default-ssl.conf
+            #owner=root group=root mode=0644
+
+  - name: reload apache.
+    command: >
+      service apache2 reload
+    become: yes

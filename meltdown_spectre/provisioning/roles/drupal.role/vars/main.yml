@@ -1,0 +1,6 @@
+---
+# vars file for drupal.role
+php_packages:
+  - php5
+  - libapache2-mod-php5
+  - php5-mcrypt

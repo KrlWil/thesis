@@ -1,0 +1,6 @@
+webpatched ansible_host=192.168.33.100
+webvulnerable ansible_host=192.168.33.101
+
+[webservers]
+webvulnerable
+webpatched

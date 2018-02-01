@@ -1,0 +1,19 @@
+---
+# vars file for mysql.role
+mysql_packages:
+  - mysql-common
+  - mysql-server
+  - python-mysqldb
+
+mysql_conf_dir: "/etc/mysql/"
+
+mysql_db:
+     - name: drupaldb
+       replicate: no
+
+mysql_users:
+     - name: drupaluser
+       pass: drupaluser
+       priv: "*.*:ALL"
+
+mysql_service: mysql

@@ -1,0 +1,10 @@
+---
+- name: apt-get update
+  become: yes
+  apt: update_cache=yes
+  
+- name: Install MySQL packages
+  become: yes
+  apt: "name={{ item }} state=installed"
+  with_items: "{{ mysql_packages }}"
+  

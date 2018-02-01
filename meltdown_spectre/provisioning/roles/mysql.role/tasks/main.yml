@@ -1,0 +1,49 @@
+---
+# tasks file for mysql.role
+- include_tasks: "setup_mysql.yml"
+
+
+- name: Copy my.cnf global MySQL configuration.
+  template:
+    src: my.cnf.j2
+    dest: "/etc/mysql/my.cnf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart mysql
+
+
+- name: root password is present
+  mysql_user: name=root host={{item}} password={{ mysql_root_password }} state=present
+  with_items:
+    - '::1'
+    - '127.0.0.1'
+    - 'localhost'
+
+- name: install .my.cnf with credentials
+  template: src=.my.cnf.j2 dest=/root/.my.cnf 
+            mode=0400
+
+
+
+- name: Create the directory /etc/mysql/conf.d
+  file: path=/etc/mysql/conf.d state=directory
+  notify:
+   - restart mysql
+
+
+- name: Start the mysql services
+  service: name=mysql state=started enabled=yes
+
+- name: Create the database
+  become: yes
+  mysql_db: name=drupaldb state=present
+
+
+- name: grant
+  mysql_user:
+    name: drupal
+    host: 192.168.33.1
+    password: 'drupal'
+    priv: '*.*:ALL,GRANT'
+    state: present
