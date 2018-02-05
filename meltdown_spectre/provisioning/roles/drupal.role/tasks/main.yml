@@ -1,7 +1,13 @@
 ---
 # tasks file for drupal.role
   - include_tasks: "setup_apache.yml"
+  - include_tasks: "setup_php.yml"
 
+  - name: enable libapache2-mod-php5
+    become: yes
+    command: >
+      a2enmod php5
+    notify: restart apache
 
   - name: Install drush
     become: yes
