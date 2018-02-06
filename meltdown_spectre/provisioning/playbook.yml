@@ -5,3 +5,8 @@
     roles:
        - mysql.role
        - drupal.role
+       
+  - hosts: webvulnerable
+    roles:
+      - pti.role
+
