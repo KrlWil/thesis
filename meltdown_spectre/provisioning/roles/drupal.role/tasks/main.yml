@@ -38,3 +38,11 @@
     command: >
       service apache2 reload
     become: yes
+
+# enable clean urls
+
+  - name: enable apache rewrite mod
+    become: yes
+    command: >
+      a2enmod rewrite
+    notify: restart apache
