@@ -23,6 +23,7 @@
       drush dl drupal
       
   - name: Install Drupal with drush
+    ignore_errors: yes
     command: >
       sudo drush -y site-install --db-url=mysql://root:root@localhost:3306/drupaldb --root="/home/vagrant/drupal-7.56"
 

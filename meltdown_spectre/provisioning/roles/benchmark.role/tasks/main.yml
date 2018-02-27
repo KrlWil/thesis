@@ -1,0 +1,62 @@
+---
+# tasks file for benchmark.role
+  - name: add 32 bit arch
+    become: yes
+    command: >
+      dpkg --add-architecture i386
+      
+
+
+  - name: apt-get update
+    become: yes
+    apt: update_cache=yes
+
+  - name: install ab to latest version
+    become: yes
+    apt: name=apache2-utils state=latest
+    
+
+    
+  - name: install autobench
+    become: yes
+    apt:
+      deb: http://www.xenoclast.org/autobench/downloads/debian/autobench_2.1.2_i386.deb
+
+  - name: add 32 bit arch
+    become: yes
+    command: >
+      dpkg --add-architecture i386
+
+
+  - name: install new autobench config file
+    command: >
+      autobench --version
+
+#autobench
+
+  - name: autobench webpatched
+    become: yes
+    when: inventory_hostname == "webpatched"
+    command: >
+      autobench --single_host --host1 192.168.33.100 --quiet --low_rate 20 --high_rate 200 --rate_step 2 --num_call 1 --num_conn 50 --timeout 5 --file /vagrant/autobench_patched.tsv
+
+
+  - name: autobench webvulnerable
+    become: yes
+    when: inventory_hostname == "webvulnerable"
+    command: >
+      autobench --single_host --host1 192.168.33.101 --quiet --low_rate 20 --high_rate 200 --rate_step 2 --num_call 1 --num_conn 50 --timeout 5 --file /vagrant/autobench_vulnerable.tsv
+
+#ab
+
+  - name: ab webpatched
+    become: yes
+    when: inventory_hostname == "webpatched"
+    command: >
+      ab -n 1000 -g /vagrant/ab_patched.txt http://192.168.33.100/
+
+  - name: ab webvulnerable
+    become: yes
+    when: inventory_hostname == "webvulnerable"
+    command: >
+      ab -n 1000 -g /vagrant/ab_vulnerable.txt http://192.168.33.101/

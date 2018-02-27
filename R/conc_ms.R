@@ -11,3 +11,4 @@ newdata <- results.tsv[myvars]
 ms <- newdata[,]
 plot(ms,  type='l', col='red', main ='Response time', xlab='Concurrent connections', ylab='ms')
 grid(col = "lightgray", lty = "dotted")
+
