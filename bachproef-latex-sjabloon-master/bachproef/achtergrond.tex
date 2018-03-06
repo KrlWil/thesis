@@ -1,0 +1,70 @@
+%\chapter{}
+%\section{ }
+
+\chapter{Achtergrond}
+
+\section{Spectre}
+
+\subsection{Patch}
+Spectre is meer ingrijpend als meltdown.
+Intel heeft Skylake (6000-series) definitief gepatched.
+Intel had al een beta patch maar die veroorzaakte spontane reboots en de distributie is ervan stopgezet.
+
+Kaby Lake (7000-series) en Coffee Lake (8000-series) hebben definitieve microcode patches gekregen. De vorige beta patches hadden ook veel bugs.
+
+De moederbordfabrikanten moeten die nu in hun bios implementeren.
+
+Voor de volledige roadmap heef Intel de "Microcode Revisions Guidance" online gezet.
+
+Volgens die roadmap gaat Intel door tot Core 2 Duo/Quad uit 2008.
+Maar het valt nog te zien of moederbordfabrikanten een nieuwe BIOS voorzien met de gepatchte microcode.
+
+Volgens Intel CEO Brian Krzanichzullen zullen de volgende generatie Intel CPUs een "in-silicon" fix hebben. De bron van Spectre (branch prediction en speculative execution) zal nog steeds werken en snelheidswinst geven maar de processorarchitectuur zal moeten aangepast worden.
+
+De microcode in een patch wordt niet direct weggeschreven naar de processor maar wordt gewoon bij elke boot opnieuw ingeladen.
+
+
+\subsection{Branch Prediction}
+Speculatieve uitvoering verplicht de processor om gissingen te doen. Hoe beter het algoritme van de CPU hoe meer prestaties. Een voorbeeld van branch prediction is een "if statement". 
+\parencite{Kocher}
+Er zijn schemas gebaseerd op de "branch geschiedenis" om de beste voorspellingen te maken. Het voorspelde doelwit wordt opgeslagen in de branch target buffer.
+
+Branch prediction wordt mogelijk gemaakt door een "predictor", dat ingebakken zit in de processor.
+
+
+\section{Meltdown mitigation}
+\subsection{Statische analyse}
+Statische code analyse wordt gebruikt om code sequenties te analyseren zonder het uit te voeren. Als het code vindt met kwetsbare sequenties zal het speculatieve executie uitschakelen tot alle code veilig uitgevoerd is.
+Speculatieve executie wordt gestopt met een geheugenbarrière, ook bekend als een memory fence. Dit zijn extra instructies geschreven in machine code die de compiler dwingen om de instructies "in order" te draaien.
+Tot nu toe is dit de enige manier om meltdown te vermijden.
+
+\section{Spectre mitigation}
+\subsection{Retpoline}
+Retpoline is een mitigation voor spectre variant 2 (CVE-2017-5715) gemaakt door Google.
+Retpoline is een manier om branch prediction teniet te doen.
+Het is een nieuw concept om speculatieve executie uit te schakelen bij indirecte branches.
+In praktijk wordt voor de x86 architectuur het geheugenadres in register "r11" vervangen.
+
+jmp *%r11
+
+ call set_up_target;
+capture_spec:         
+pause;
+jmp capture_spec;
+set_up_target:
+mov %r11, (%rsp);   
+ret;                  
+\parencite{Turner2018}
+
+Als de CPU nu code "out of order" uitvoert zal het in een oneindige lus vastzitten. Het resultaat wordt niet teruggestuurd dus het is niet zichtbaar door een aanvaller.
+De lus wordt pas stopgezet als het echte resultaat teruggestuurd wordt.
+Deze mitigation is wel geen microcode patch. Software zal hergecompileerd moeten worden.
+
+
+\subsection{IBRS}
+
+Indirect Branch Restricted Speculation (IBRS) verwijdert de cache tussen process modes en schakelt branch prediction uit voor 1 CPU kern (als de CPU hyperthreading heeft worden beide threads uitgeschakelt). Dit gebeurt met een onderdeel van IBRS: Single Thread Indirect Branch Predictors (STIBP).
+Als de processor IBRS niet ondersteund moet software de "IA32_SPEC_CTRL.IBRS" bit instellen op 1.
+Software moet wel herschreven worden om deze mechanismen te gebruiken.
+
+\parencite{Intel2018}
