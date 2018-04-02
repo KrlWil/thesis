@@ -5,9 +5,12 @@
     roles:
        - mysql.role
        - drupal.role
-       - benchmark.role
        
   - hosts: webvulnerable
     roles:
       - pti.role
+
+  - hosts: loadgenerator
+    roles:
+      - benchmark.role
 

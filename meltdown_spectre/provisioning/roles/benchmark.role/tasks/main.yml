@@ -36,14 +36,12 @@
 
   - name: autobench webpatched
     become: yes
-    when: inventory_hostname == "webpatched"
     command: >
       autobench --single_host --host1 192.168.33.100 --quiet --low_rate 20 --high_rate 200 --rate_step 2 --num_call 1 --num_conn 50 --timeout 5 --file /vagrant/autobench_patched.tsv
 
 
   - name: autobench webvulnerable
     become: yes
-    when: inventory_hostname == "webvulnerable"
     command: >
       autobench --single_host --host1 192.168.33.101 --quiet --low_rate 20 --high_rate 200 --rate_step 2 --num_call 1 --num_conn 50 --timeout 5 --file /vagrant/autobench_vulnerable.tsv
 
@@ -51,12 +49,32 @@
 
   - name: ab webpatched
     become: yes
-    when: inventory_hostname == "webpatched"
     command: >
       ab -n 1000 -g /vagrant/ab_patched.txt http://192.168.33.100/
 
   - name: ab webvulnerable
     become: yes
-    when: inventory_hostname == "webvulnerable"
     command: >
       ab -n 1000 -g /vagrant/ab_vulnerable.txt http://192.168.33.101/
+
+#cpu usage webpatched
+
+  - name: cpu usage webpatched autobench
+    become: yes
+    shell: nohup autobench --single_host --host1 192.168.33.100 --quiet --low_rate 40 --high_rate 40 --num_call 1 --num_conn 1000 --timeout 5 &
+
+  - name: cpu usage webpatched vmstat
+    become: yes
+    shell: vmstat 1 30 --one-header> /vagrant/vmstat_patched.dat
+    delegate_to: webpatched
+
+#cpu usage webvulnerable
+
+  - name: cpu usage webvulnerable autobench
+    become: yes
+    shell: nohup autobench --single_host --host1 192.168.33.101 --quiet --low_rate 40 --high_rate 40 --num_call 1 --num_conn 1000 --timeout 5 &
+
+  - name: cpu usage webvulnerable vmstat
+    become: yes
+    shell: vmstat 1 30 --one-header> /vagrant/vmstat_vulnerable.dat
+    delegate_to: webvulnerable

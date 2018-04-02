@@ -1,6 +1,14 @@
-webpatched ansible_host=192.168.33.100
-webvulnerable ansible_host=192.168.33.101
+webpatched ansible_host=192.168.33.100 ansible_ssh_pass=vagrant ansible_ssh_user=vagrant
+webvulnerable ansible_host=192.168.33.101 ansible_ssh_pass=vagrant ansible_ssh_user=vagrant
+loadgenerator ansible_host=192.168.33.102
+
 
 [webservers]
 webvulnerable
 webpatched
+
+[all]
+webpatched
+webvulnerable
+loadgenerator
+

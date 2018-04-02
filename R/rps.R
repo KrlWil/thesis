@@ -7,30 +7,30 @@
 resultspatched.tsv <- read.table("~/Desktop/R/autobench_patched.tsv", header = TRUE, sep = "\t")
 resultsvulnerable.tsv <- read.table("~/Desktop/R/autobench_vulnerable.tsv", header = TRUE, sep = "\t")
 
-myvarspatched <- c("dem_req_rate", "resp_time_192.168.33.100")
-myvarsvulnerable <- c("dem_req_rate", "resp_time_192.168.33.101")
+myvarspatched <- c("dem_req_rate", "req_rate_192.168.33.100")
+myvarsvulnerable <- c("dem_req_rate", "req_rate_192.168.33.101")
 
 newdatapatched <- resultspatched.tsv[myvarspatched]
 newdatavulnerable <- resultsvulnerable.tsv[myvarsvulnerable]
 
-mspatched <- newdatapatched[,]
-msvulnerable <- newdatavulnerable[,]
+rpspatched <- newdatapatched[,]
+rpsvulnerable <- newdatavulnerable[,]
 
 #patched
-plot(mspatched,  type='l', col='red', main ='Response time Patched', xlab='Concurrent connections', ylab='ms')
+plot(rpspatched,  type='l', col='red', main ='Request per second Patched', xlab='Concurrent connections', ylab='Request per second')
 grid(col = "lightgray", lty = "dotted")
 
 #vulnerable
-plot(msvulnerable,  type='l', col='red', main ='Response time Vulnerable', xlab='Concurrent connections', ylab='ms')
+plot(rpsvulnerable,  type='l', col='red', main ='Request per second Vulnerable', xlab='Concurrent connections', ylab='Request per second')
 grid(col = "lightgray", lty = "dotted")
 
 
 #patched + vulnerable
 
-plot(mspatched,  type='l', col='red', main ='Response time Patched', xlab='Concurrent connections', ylab='ms')
-lines(msvulnerable, type="l", col="blue")
+plot(rpspatched,  type='l', col='red', main ='Request per second', xlab='Concurrent connections', ylab='Request per second')
+lines(rpsvulnerable, type="l", col="blue")
 
-legend(150, 200,  # Plot legend
+legend(75, 30,  # Plot legend
        c("vulnerable", "patched"),
        col = c("blue", "red"),
        lty = 1,

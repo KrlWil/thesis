@@ -3,5 +3,5 @@ GRUB_HIDDEN_TIMEOUT=0
 GRUB_HIDDEN_TIMEOUT_QUIET=true
 GRUB_TIMEOUT=0
 GRUB_DISTRIBUTOR=`lsb_release -i -s 2> /dev/null || echo Debian`
-GRUB_CMDLINE_LINUX_DEFAULT="console=tty1 console=tty0 nopti"
-GRUB_CMDLINE_LINUX="nopti"
+GRUB_CMDLINE_LINUX_DEFAULT="console=tty1 console=tty0 spectre_v2=off nopti"
+GRUB_CMDLINE_LINUX="spectre_v2=off nopti"
