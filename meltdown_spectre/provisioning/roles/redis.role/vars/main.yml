@@ -1,2 +1,3 @@
 ---
 # vars file for redis.role
+redis_conf_path: /etc/redis/redis.conf

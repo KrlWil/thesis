@@ -78,3 +78,20 @@
     become: yes
     shell: vmstat 1 30 --one-header> /vagrant/vmstat_vulnerable.dat
     delegate_to: webvulnerable
+
+
+#redis
+  - name: install redis tools
+    become: yes
+    apt: name=redis-tools state=present
+
+
+  - name: redis benchmark webvulnerable
+    become: yes
+    shell: >
+      redis-benchmark -h 192.168.33.101 -t PING_INLINE,PING_BULK,SET,GET,INCR,LPUSH,LPOP,SADD,SPOP --csv> /vagrant/redis_vulnerable.csv
+      
+  - name: redis benchmark webpatched
+    become: yes
+    shell: >
+      redis-benchmark -h 192.168.33.100 -t PING_INLINE,PING_BULK,SET,GET,INCR,LPUSH,LPOP,SADD,SPOP --csv> /vagrant/redis_patched.csv

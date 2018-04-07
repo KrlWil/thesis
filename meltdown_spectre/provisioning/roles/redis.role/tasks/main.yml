@@ -1,2 +1,14 @@
 ---
 # tasks file for redis.role
+
+- name: Install Redis.
+  apt:
+    name: "redis-server"
+    state: present
+    
+- name: Redis config.
+  template:
+    src: redis.conf.j2
+    dest: "{{ redis_conf_path }}"
+    mode: 0644
+  notify: restart redis

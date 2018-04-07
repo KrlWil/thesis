@@ -1,2 +1,9 @@
 ---
 # handlers file for redis.role
+
+#~ - name: restart redis
+  #~ service: "name=redis-server state=restarted"
+
+- name: restart redis
+  command: >
+    sudo service redis-server restart

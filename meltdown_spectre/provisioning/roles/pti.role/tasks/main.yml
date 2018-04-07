@@ -20,6 +20,6 @@
 - name: Restart server
   become: yes
   command: reboot
-  async: 0
-  poll: 0
+  #~ async: 0
+  #~ poll: 0
   ignore_errors: true
