@@ -52,4 +52,94 @@
   url    = {https://support.google.com/faqs/answer/7625886},
 }
 
+@TechReport{Intel2018,
+  author = {Intel},
+  title  = {Speculative Execution Side Channel Mitigations},
+  year   = {2018},
+  url    = {https://software.intel.com/sites/default/files/managed/c5/63/336996-Speculative-Execution-Side-Channel-Mitigations.pdf},
+}
+
+@Proceedings{Shacham2007,
+  title  = {The Geometry of Innocent Flesh on the Bone: Return-into-libc without Function Calls (on the x86)},
+  year   = {2007},
+  editor = {Hovav Shacham},
+}
+
+@Online{KernelNewbies2004,
+  author = {{Kernel Newbies}},
+  title  = {Linux kernel 2.6.8},
+  year   = {2004},
+  url    = {https://kernelnewbies.org/Linux_2_6_8},
+}
+
+@Book{Patterson2012,
+  author  = {David A. Patterson, John L. Hennessey},
+  title   = {Computer Organization and Design},
+  year    = {2012},
+  edition = {4},
+}
+
+@Book{Touhafi2011,
+  author = {Abdellah Touhafi, An Braeken, Gianluca Cornetta, Nele Mentens, Kris Steenhaut},
+  title  = {Secure Techniques for Remote Reconfiguration of Wireless Embedded Systems},
+  year   = {2011},
+}
+
+@Online{Evans2014,
+  author = {Chris Evans},
+  title  = {Announcing Project Zero},
+  year   = {2014},
+  url    = {https://security.googleblog.com/2014/07/announcing-project-zero.html},
+}
+
+@Book{Katzan1971,
+  author = {Harry Katzan},
+  title  = {Computer Organization and the System/370},
+  year   = {1971},
+}
+
+@Online{Hruska2017,
+  author = {Joel Hruska},
+  title  = {How L1 and L2 CPU Caches Work, and Why They’re an Essential Part of Modern Chips},
+  year   = {2017},
+  url    = {https://www.extremetech.com/extreme/188776-how-l1-and-l2-cpu-caches-work-and-why-theyre-an-essential-part-of-modern-chips},
+}
+
+@Online{Godbolt2016,
+  author = {Matt Godbolt},
+  year   = {2016},
+  url    = {https://xania.org/201602/haswell-and-ivy-btb},
+}
+
+@Book{Freund1999,
+  author = {Yoav Freund, Robert Elias Schapire},
+  title  = {Large margin classification using the perceptron algorithm},
+  year   = {1999},
+}
+
+@Proceedings{Steven2001,
+  title  = {Dynamic branch prediction using neural networks},
+  year   = {2001},
+  editor = {G. Steven},
+}
+
+@Article{Redhat2018,
+  author = {Redhat},
+  title  = {Speculative Execution Exploit Performance Impacts - Describing the performance impacts to security patches for CVE-2017-5754 CVE-2017-5753 and CVE-2017-5715},
+  year   = {2018},
+}
+
+@Online{Chen2018,
+  author = {Guoxing Chen, Sanchuan Chen, Yuan Xiao, Yinqian Zhang, Zhiqiang Lin, Ten H. Lai},
+  title  = {SGXPECTRE Attacks: Leaking Enclave Secrets via Speculative Execution},
+  year   = {2018},
+}
+
+@Online{Tian2018,
+  author = {Dave Tian},
+  title  = {Spectre attack against SGX enclave},
+  year   = {2018},
+  url    = {https://github.com/lsds/spectre-attack-sgx},
+}
+
 @Comment{jabref-meta: databaseType:biblatex;}

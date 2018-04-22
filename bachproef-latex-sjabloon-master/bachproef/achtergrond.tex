@@ -3,7 +3,32 @@
 
 \chapter{Achtergrond}
 
+
+
 \section{Spectre}
+
+\subsection{Spectre aanval}
+Spectre is geclassificeerd als een "side channel attack".
+Een side channel aanval is een verzameling van aanvallen op een cryptografieapparaat met als doel de geheime sleutel ervan te onthullen. De aanvaller probeert bepaalde patronen in het systeem te ontdekken door analyse van informatie die is verkregen uit de fysieke implementatie van het systeem. Deze informatie kan bijvoorbeeld timinganalyse, stroomverbruik, elektromagnetische lekken of zelfs geluid zijn. \parencite{Touhafi2011}
+Computers zijn niet alleen vatbaar voor fysieke side channel aanvallen
+
+Microprocessors met kwetsbare speculatieve executie mogelijkheden zijn gevonden in miljarden toestellen van Intel, AMD en ARM.
+
+Ook Intel SGX (Sofware Guard eXtensions) is vatbaar voor spectre. 
+Het doel van Intel SGX is om het vertrouwensvereiste tussen gebruiker en een clouddienst zoals Amazon te verminderen.
+Het biedt een praktische platformabstractie aan om de programmeur te helpen. 
+Het is een soort van beveiligde DRM (Digital rights management).
+Intel SGX maakt een container aan die software isoleert van andere software.
+Dit betekent niet dat men Amazon of Intel 100 percent kan betrouwen (ze kunnen extreem moeilijk garanderen dat ze geen backdoor voor het debuggen van SGX geïnstalleerd hebben).
+Een aantal onderzoekers hebben nu met een spectre aanval data in de Intel SGX kunnen lezen.
+Ze hebben "SGXPECTRE" losgelaten op de SGX "enclave" (enclaves zijn privéregios van geheugen) om de geheimen er uit te halen.
+Om de werking in praktijk te tonen, hebben ze systematisch de mogelijke vectoren van branch target injection onderzocht om de raceconditie te winnen tijdens de speculatieve uitvoering van de enclave. Verder is er onderzocht naar technieken om automisch codepatronen te vinden nodig voor een aanval te lanceren. Praktische aanvallen zijn mogelijk tegen een willekeurig  enclaveprogramma geschreven met Intel's SGX SDK. Niet alleen kunnen geheimen gelezen worden in het enclave-geheugen, maar ook de registers die in enclave-modus in gebruik zijn.\parencite{Chen2018}
+Er wordt wel benadrukt dat er fysieke toegang nodig is tot het systeem. Met fysieke toegang zou Indirect Branch Restricted Speculation (IBRS) uitgeschakelt kunnen worden die geïnstalleerd is met een patch.
+De enclave controleert nog niet of IBRS is ingeschakeld.
+De aanval is ongeveer gelijk met de branch misprediction spectre aanval van \parencite{kocher}. Het enigste verschil is dat de geheime gegevens, de slachtofferfunctie (victim_function) en de overflowarray in de enclave verplaatst worden.
+De aanvaller roept "victim_function" aan via een "ecall" om de array te indexeren. \parencite{Tian2018}
+
+
 
 \subsection{Patch}
 Spectre is meer ingrijpend als meltdown.
@@ -17,30 +42,165 @@ De moederbordfabrikanten moeten die nu in hun bios implementeren.
 Voor de volledige roadmap heef Intel de "Microcode Revisions Guidance" online gezet.
 
 Volgens die roadmap gaat Intel door tot Core 2 Duo/Quad uit 2008.
+Ondertussen heeft Intel het werk aan de patches voor oudere processorseries stopgezet.
+Het gaat over de eerste generatie Core i7/i5 processors (de Bloomfield-generatie) en sommige chips van de Core 2 Duo en Core 2 Quad generatie.
+
+
+Als verklaring geeft Intel: "Na een uitgebreid onderzoek naar de microarchitectuur en microcodemogelijkheden voor deze producten, heeft Intel besloten geen microcode-updates voor deze producten vrij te geven voor een of meer redenen, waaronder, maar niet beperkt tot het volgende:
+a) Micro - architecturale kenmerken die een praktische implementatie van Variant 2 (CVE - 2017 - 5715) uitsluiten;
+b) Beperkte ondersteuning van systeemsoftware;
+c) Op basis van feedback worden de meeste van deze producten geïmplementeerd als "gesloten systemen" en daarom wordt verwacht dat ze een lagere kans hebben om te worden blootgesteld aan deze kwetsbaarheden." \parencite{Intel2018a}
+
+
 Maar het valt nog te zien of moederbordfabrikanten een nieuwe BIOS voorzien met de gepatchte microcode.
 
 Volgens Intel CEO Brian Krzanichzullen zullen de volgende generatie Intel CPUs een "in-silicon" fix hebben. De bron van Spectre (branch prediction en speculative execution) zal nog steeds werken en snelheidswinst geven maar de processorarchitectuur zal moeten aangepast worden.
 
 De microcode in een patch wordt niet direct weggeschreven naar de processor maar wordt gewoon bij elke boot opnieuw ingeladen.
 
+Goede oplossingen vereisen veranderingen in processor ontwerpen en architectuur (Instruction Set Architectures).
+
+Bestuursvoorzitter van AMD Lisa Su heeft aangekondigd dat de Zen 2-processors (Ryzen 3000-serie), die vermoedelijk in Q1 van 2019 uitkomen op hardwarelevel tegen spectre zullen beveiligd zijn. Ryzen 2, die in april uitgekomen zijn, zijn niet uitgerust met zo een update. Microcode updates voor al de processors in de serie zijn natuurlijk wel beschikbaar.
+
+De processors van Intel krijgen vanaf eind 2018 al hardwarematige oplossingen voor meltdown en spectre.
+Dit heeft Brian Krzanisch (CEO van Intel) aan zijn investeerders laten weten tijdens de publicatie van de financiën van Intel. Krzanisch belooft dat de nieuwe chips (die vermoedelijk op het 10 nm-procedé werken)
+
+Patches voor Page Table Isolation (PTI) tegen Meltdown zijn er al sinds het begin van het jaar. De patches zijn nu verfijnd en zelfs de 32-bits versie is geïmplementeerd voor x86-systemen.
+Patches voor Windows waren niet zonder problemen: een bug in de meltdown patch zorgde voor een kernelgeheugenlek zonder enige exploit en kon door een ieder gelezen worden.
+
+Ook voor System Z van IBM zijn er patches voor beide Spectre versies.
+In plaats van Retpoline noemt de patch "Expoline".
+Retpoline is niet mogelijk omdat op System Z systemen er geen "return" instructies zijn maar indirecte branches voor de return functies. Expoline code roept nu indirecte branch instructies aan via EX en EXRL instructies.
+
+ARM 64-bit systemen in smartphones zijn beschermd voor Spectre v1, v2 en Meltdown.
+
+Sinds Spectre gebruik kan maken van Javascript hebben alle grote browsers een update gekregen.
+Google gebruikt met Chrome "Site isolation". Site isolation zorgt ervoor dat elke site een verschillend proces krijgt toegewezen. Zo hebben ze alleen maar toegang tot hun eigen data.
+
+\subsection{Spectre v1}
+Spectre variant 1 heeft alleen invloed op het lokaal proces.
+De patch voor variant 1 is een mitigatie door de output van compilers aan te passen.
+
+\subsection{Spectre v2}
+
+\subsection{Branchscope}
+Veiligheidsexperts hebben ontdekt dat Intel-chips kwetsbaar zijn voor een aanval die lijkt op Meltdown en spectre.
+In de nieuwe aanval past de aanvaller de PHT (Pattern History Table) aan.
+De kwaadaardige code voert dan een branch uit die potentieel een verstoring kan veroorzaken in de PHT.
 
 \subsection{Branch Prediction}
+Oude CPU's voeren één instructie uit per klokcyclus.
+Instruction Level Parallelism (ILP) is een samenwerking van hardware en software om IPC te verbeteren. Hoe snel een programma presteert hangt af van beide: de CPU of de software zal de bottleneck zijn.
+ Voor betere snelheid werden "pipelines" geïntroduceerd. Per klokcyclus werden meerdere delen van verschillende commando's uitgevoerd. De status wordt onthouden en overgedragen naar de volgende klokcyclus. Ondertussen kan er al een nieuwe pipeline gemaakt worden met nieuwe instructies. Deze verbetering in IPC (Instructies per klok) zorgt voor enkele problemen: een commando heeft het resultaat van een ander commando nodig maar is nog steeds in de pipeline, de programmalogica hangt af van een branch in de structuur. In het eerste geval kan de processor of eventueel software deze instructies "out of order" uitvoeren zodat ze dichter bij elkaar liggen. In het tweede geval kan de CPU wachten op het resultaat maar dat kan honderen klokcyclussen duren. De predictor maakt een best mogelijke schatting van het resultaat en in het slechtste geval moet de voorspellende uitvoering  worden weggegooid.
+Maar dit is typisch maar een verlies van een paar klokcyclussen.
+Software kan ook IPC verbeteren: instructieplanning is een compiler optimalisatie om pipeline stall te vermijden.
+Een pipeline stall is een vertraging in de pipeline om een probleem in de CPU architectuur op te lossen. 
+Dit gebeurt door de volgorde van instructies te herschikken.
+
+Een simpele predictor voor speculatieve executie is de Branch Target Buffer (BTB). Het wordt gebruikt om vast te leggen of eerdere branches genomen werden of niet.
+Het neemt de huidige PC (Program Counter) van de branch en gebruikt dat als een index in een tabel (de BTB) en van die tabel wordt de nieuwe PC voorspelt.
+De Program Counter is een register in de CPU dat bijhoudt op welke instructie het momenteel is, het incrementeert telkens met de volgende instructie.\parencite{Katzan1971}
+De nieuwe en de huidige PC worden mee in de pipeline genomen. Later in de pipeline hebben we de juiste PC en dan wordt de juiste PC met de voorspelde PC vergeleken. Als ze niet gelijk zijn is de voorspelling fout. De nieuwe PC wordt dan in de BTB tabel geschreven zodat de volgende confrontatie met de branch goed voorspeld wordt.
+De BTB moet een volledig instructie-adres opslaan. Typisch is dat 64 bits of 8 bytes.
+
 Speculatieve uitvoering verplicht de processor om gissingen te doen. Hoe beter het algoritme van de CPU hoe meer prestaties. Een voorbeeld van branch prediction is een "if statement". 
 \parencite{Kocher}
 Er zijn schemas gebaseerd op de "branch geschiedenis" om de beste voorspellingen te maken. Het voorspelde doelwit wordt opgeslagen in de branch target buffer.
 
 Branch prediction wordt mogelijk gemaakt door een "predictor", dat ingebakken zit in de processor.
+Een moderne predictor gaat elke instructie speculatief uitvoeren, als het maar een branch instructie is.
+
+De werking van speculatieve executie is een designkeuze van de fabrikant: een dure, performantie CPU kan aggressievere speculatieve executie hebben dan een goedkopere uit dezelfde serie/architectuur.
+
+\section{Meltdown mitigatie}
+\subsection{Meltdown}
+Meltdown omzeilt de door hardware afgedwongen isolatie van
+beveiligingsdomeinen. Er is geen sprake van software-kwetsbaarheid
+in Meltdown. Er is geen documentatie
+of een dergelijke oplossing de ontwikkeling van volledig
+nieuwe hardware vereist, of kan worden opgelost met behulp van een microcode
+update.
+Omdat Meltdown misbruik maakt van out-of-order execution, is het gemakkelijk opgelost
+door out of-order volledig uit te schakelen. Maar, de prestatie-effecten
+zouden groot zijn, omdat parallellisme van moderne CPU's
+niet meer gebruikt kan worden . Dit is dus geen perfecte
+oplossing.
+Meltdown is een vorm van race-conditie tussen het
+ophalen van een geheugenadres en de bijbehorende controle voor dit adres. De toestemming en de registerophaling serialiseren
+ kan meltdown voorkomen,
+aangezien het geheugenadres nooit wordt opgehaald als de permissie
+controle mislukt. Dit brengt echter een aanzienlijke overhead met zich mee
+met elke fetch, omdat de fetch moet stoppen
+totdat de machtigingscontrole is voltooid.
+Een meer realistische oplossing zou zijn om een ​harde opsplitsing te introduceren
+van gebruikersruimte en kernelruimte. Dit kan worden ingeschakeld
+ door moderne kernels met een
+bit in een CPU-register. Als de
+bit is ingesteld, moet de kernelruimte in de eerste helft 
+van de adresruimte bevinden, en de gebruikersruimte moet zich bevinden in 
+de tweede helft van de adresruimte. Met deze splitsing, kan men onmiddellijk identificeren of een
+fetch van de bestemming in strijd zou zijn met een permissie,
+omdat het permissie-niveau rechtstreeks kan worden afgeleid van
+het virtuele adres zonder verdere opzoekingen. Een dergelijke oplossing zou weinig impact hebben op performantie. Verder is de achterwaartse compatibiliteit
+verzekerd, omdat de kernel-bit niet standaard is ingesteld en
+de kernel stelt het alleen in als het de functie ondersteunt.
+Merk op dat deze tegenmaatregelen alleen Meltdown voorkomen,
+en niet de klasse van Spectre-aanvallen. 
+Het is belangrijk om tegenmaatregelen in te zetten
+tegen beide aanvallen.
 
 
-\section{Meltdown mitigation}
+
+
 \subsection{Statische analyse}
 Statische code analyse wordt gebruikt om code sequenties te analyseren zonder het uit te voeren. Als het code vindt met kwetsbare sequenties zal het speculatieve executie uitschakelen tot alle code veilig uitgevoerd is.
 Speculatieve executie wordt gestopt met een geheugenbarrière, ook bekend als een memory fence. Dit zijn extra instructies geschreven in machine code die de compiler dwingen om de instructies "in order" te draaien.
-Tot nu toe is dit de enige manier om meltdown te vermijden.
+
+
+\subsection{KPTI}
+Omdat hardware niet zo gemakkelijk te patchen is, is er behoefte aan
+softwarematige oplossingen totdat nieuwe hardware kan worden geïmplementeerd.
+KPTI of KAISER is een kernelaanpassing
+om de kernel niet in de gebruikersruimte te plaatsen.
+Deze wijziging was bedoeld om side-channel aanvallen te voorkomen
+die KASLR breken. Het is echter ook
+goed voor Meltdown, omdat de mapping naar kernelruimte of fysiek geheugen niet beschikbaar of geldig is 
+in gebruikersruimte. KAISER is beschikbaar in de nieuwe
+releases van de Linux-kernel onder de naam kernel
+pagina tabel isolatie (KPTI). De patch zal ook
+oudere Linux-kernelversies ondersteunen. Bovendien hebben Windows, Mac OS X en iOS dezelfde functies.
+Hoewel KAISER standaard bescherming biedt tegen
+Meltdown, het heeft nog steeds een aantal beperkingen. Vanwege het ontwerp
+van de x86-architectuur, moeten meerdere bevoorrechte geheugenlocaties
+ in de gebruikersruimte worden toegewezen. Deze
+laten een aanvalsoppervlak achter, d.w.z. deze
+geheugenlocaties kunnen nog steeds worden gelezen vanuit de gebruikersruimte. 
+Hoewel deze geheugenlocaties geen geheimen bevatten,
+zoals inloggegevens, ze kunnen nog steeds pointers bevatten.
+Lekken van één pointer kan voldoende zijn om opnieuw KASLR te breken.
+Toch is KAISER momenteel de beste korte-termijnoplossing
+beschikbaar en moet daarom op alle systemen worden ingezet. Zelfs met Meltdown kan KAISER kernelpointers
+vermijden op geheugenlocaties
+die in de gebruikersruimte in kaart zijn gebracht en informatie zouden kunnen lekken. Dit zou 
+trampoline locaties vereisen voor elke kernel pointer, d.w.z.
+de interrupt handler zou de kernelcode niet rechtstreeks inroepen,
+maar met een trampoline-functie. De trampoline
+functie mag alleen in de kernel worden toegewezen. Het moet
+willekeurig worden  verdeeld met een andere offset dan de resterende
+kernel. Daarom kan een aanvaller alleen pointers lekken
+naar de trampolinecode, maar niet naar de gerandomiseerde offsets van
+de resterende kernel. Een dergelijke trampoline-code is vereist
+voor elk kernelgeheugen dat nog moet worden toegewezen in
+gebruikersruimte en bevat kernel-adressen. Deze aanpak 
+is een wisselwerking tussen prestaties en beveiliging en
+moet worden beoordeeld in toekomstige werkzaamheden.
 
 \section{Spectre mitigation}
 \subsection{Retpoline}
 Retpoline is een mitigation voor spectre variant 2 (CVE-2017-5715) gemaakt door Google.
+Indirecte branches worden geconverteerd naar "retpolines" in gevoelige code.
+De spectre v2 aanval vergiftigd eerst de Branch Target Buffer (BTB) om daarna een adres te zoeken in gevoelige code.
+Specifieker is retpoline gemaakt door Project Zero: een team van beveiligingsanalisten ingehuurd door Google gestart in 2014.\parencite{Evans2014}
 Retpoline is een manier om branch prediction teniet te doen.
 Het is een nieuw concept om speculatieve executie uit te schakelen bij indirecte branches.
 In praktijk wordt voor de x86 architectuur het geheugenadres in register "r11" vervangen.
@@ -60,11 +220,57 @@ Als de CPU nu code "out of order" uitvoert zal het in een oneindige lus vastzitt
 De lus wordt pas stopgezet als het echte resultaat teruggestuurd wordt.
 Deze mitigation is wel geen microcode patch. Software zal hergecompileerd moeten worden.
 
+Retpoline is een soort ROP (Return Oriented Programming).
+Het idee van ROP  is om kwaadaardige code in de stack te injecteren door reeds bestaande codefragmenten te gebruiken.
+Die fragmenten noemt de uitvinder van ROP (Hovav Shacham) gadgets. \parencite{Shacham2007}
+ROP is een beveiligingsaanval maar in het geval van retpoline is het een beveiligingsverlichting (mitigation).
+Een ROP instructie eindigt altijd met een return, vandaar de naam.
+ROP is een extreme versie van "stack smashing" of "bufferoverloop".
+Bufferoverloop gebeurt wanneer er teveel functies aangeroept worden en er is niet genoeg ruimte meer in de stack. De stack heeft een hard limiet en op een gegeven moment kan er geen meer geheugen gealloceerd worden.
+Stack bufferoverloop is gestopt door beveilingen zoals NX (Never Execute) en Code Signing.
+NX is een bit (no-execute bit) in gebieden van het geheugen en is geïmplementeerd in de Linux kernel sinds 2004.\parencite{KernelNewbies2004}
+ROP kan deze systemen omzeilen. 
+De "return" is een hardware instructie en vervangt traditionele "jump" of "call" instructie in systemen die gepatched zijn met "retpoline". Return instructies kunnen niet voorspeld worden door branch predictors dus een aanvaller kan geen geheugen uitlezen met een spectre aanval.
+Er zijn volledig afzonderlijke "return buffers" dat de data opslaan. Als een aanvaller een voorspelling vergiftigd heeft wordt het omgezet in een return zonder voorspelling (en dus zonder prestatiewinst). Er zijn wel uitzonderingen met nieuwere Intel chips: in speciale situaties zal de branch target buffer nog steeds gebruikt worden.
+Als een return van een geneste functie afkomstig is kan de return buffer leeg gemaakt worden. De BTB zal dan toch gebruikt worden. Retpoline instructies kunnen dan een branch nemen dat gekozen is van een aanvaller. Intel zegt dat dit gebeurd op Broadwell of nieuwere processors en dat een microcode update dit probleem kan adresseren.
+Omschakelen tussen virtuele machines kan ook voor problemen zorgen. De flags die Intel gebruikt voor spectre (zoals IBPB, IBRS) moeten ingeschakeld zijn. De Linux kernel ondersteund deze flags wel: bijvoorbeeld versie 4.16rc1
 
 \subsection{IBRS}
 
 Indirect Branch Restricted Speculation (IBRS) verwijdert de cache tussen process modes en schakelt branch prediction uit voor 1 CPU kern (als de CPU hyperthreading heeft worden beide threads uitgeschakelt). Dit gebeurt met een onderdeel van IBRS: Single Thread Indirect Branch Predictors (STIBP).
-Als de processor IBRS niet ondersteund moet software de "IA32_SPEC_CTRL.IBRS" bit instellen op 1.
+Als de processor IBRS niet ondersteund is moet software de "IA32_SPEC_CTRL.IBRS" bit instellen op 1.
+Indirect Branch Prediction Barrier (IBPB) biedt een manier aan om de branch buffer opnieuw in te stellen en de status te verwijderen. AMD heeft ook microcode updates dat ongeveer hetzelfde werken als de 3 technieken van Intel.
+Voor de nieuwste architectuur "Zen" gebruikt AMD IPBP en STIBP. Voor oudere generaties zorgt de microcode voor IBRS en IBPB. De branch predictor van de nieuwe Ryzen, Threadripper en Epyc processors werkt anders en IBRS is daarom niet nodig. AMD zegt dat de nieuwe branch predictor niet op dezelfde manier kwetsbaar is. Oudere ontwerpen van BTB's (oudere AMD chips, Intel, ARM en Apple chips) gebruiken het volledig adres van de branch niet.
+De BTB van Intel's Ivy Bridge en Haswell (en misschien zelfs Sandy Bridge) kunnen 4096 branches opslaan.\parencite{Godbolt2016}
+Elke branch kan gemapt worden naar 4 mogelijke locaties in de BTB (4-voudig set associative).
+In het geval van Haswell is het zelfs 5-voudig.
+ Het nadeel van deze techniek is dat een branch van één adres een branch van een ander adres kan beïnvloeden. Met een 4-voudige BTB kan 1 branch dus 4 locaties veranderen. In het geval van Spectre wordt de BTB vergiftigd door de aanvaller met foute adressen. Die adressen moeten niet volledig hetzelfde zijn, juist het gedeelte dat de BTB gebruikt. Wanneer de gebruiker dan een branch neemt zal het de uitkomst nemen dat is ingesteld door de aanvaller. AMD Zen chips kunnen alleen maar vergiftigd worden met een reëel, volledig adres.
+De nieuwe micro-architectuur van Samsung, de Exynos M1, heeft ook een geavanceerdere branch predictor. Het gebruikt een "perceptron" om de rate van branch hits te verbeteren.
+Een perceptron is een "algoritme voor gesuperviseerd leren van binaire classifiers (functies die kunnen bepalen of een invoer, weergegeven door een vector van getallen, behoort tot een bepaalde klasse of niet)".\parencite{Freund1999}
+Oftewel, het is een simpel neuraal netwerk. 
+De Samsung Exynos M1 kan 2 branches per cyclus doen. Het concept van pipelining wordt dus in de predictor gebruikt.
+Als de predictor tijdens een branch verkeerd gegokt heeft moet de opgeslagen status opnieuw geladen worden en dat kan kostbare tijd innemen.
+Branch prediction met perceptrons is niet nieuw: er zijn al veel studies rond gedaan en zelfs in oudere chips geïmplementeerd. Een van die chips is een AMD Trinity (A10-4600M) van 2012: de perceptron branch predictor werkte in parallel met de primaire branch predictor en had een aanvullende functie. 
+Als de oude predictor en de nieuwe perceptron predictor over een branch van mening verschillen wordt het pad van de nieuwe predictor genomen.
+Een conferentie uit 2001 demonstreerde dat een neurale predictor voorspellingsrates kan halen vergelijkbaar met conventionele, 2-niveau adaptieve predictors en dat neurale predictors verder onderzoek verdienen. \parencite{Steven2001}
+
+ De branch predictor van Zen gebruikt altijd het volledige adres van de branch.
 Software moet wel herschreven worden om deze mechanismen te gebruiken.
 
 \parencite{Intel2018}
+
+\section{Geheugen Levels}
+Processors gebruiken een hiërarchie van achtereenvolgend sneller wordende caches. Dit zijn de L1,L2,L3 caches.
+Hoe lager het cacheniveau, hoe sneller de cache, maar hoe kleiner het is. Als een computer twee kernen heeft zal elke kern zijn eigen L1 en L2 cache hebben. Typisch is de L3 cache groot maar die wordt gedeeld met alle kernen.
+
+ Voor de beste performantie zit de L1 cache in de kern zelf geëtst.
+ Ter vergelijking: L1, L2 en L3 hebben een latency van respectievelijk 3, 4, 21 en 87 klokcyclussen (AMD Bulldozer).
+ In systemen met meerderen kernen, aangezien er meer dan één L1/L2 cache is en elke cache een kopie van dezelfde gegevens kan bevatten, als deze in één kern wordt bijgewerkt moeten alle andere ook worden bijgewerkt.
+ Dit is waar het concept van "valid bit" in beeld komt.
+ Tijdens het opstarten worden alle valid bits op "invalid" gezet. De valid bit is na de "tag" gepositioneerd.
+ Als de tag hetzelfde is als het adres maar de valid bit is 0, wordt de ophaalactie als een "cache miss" behandelt.
+ Een cache hit conditie is dus alleen voldaan als de tag gelijk is aan het geheugenbloknummer en de valid bit gelijk is aan 1. Door de initiele waarde van de valid bit op 0 te zetten kan er geen cache hits zijn voordat echte data opgehaalt wordt.
+Alle cacheniveaus van een moderne CPU zijn typisch n-way associatieve caches. Een associatieve cache met twee richtingen betekent dat elk hoofdgeheugenblok kan worden toegewezen aan een van twee cacheblokken. De L1 cache van de Piledriver architectuur is 2-way.\parencite{Hruska2017}
+Hoe meer richtingen en hoe groter de cache, hoe hoger de hit-rate. L2 cache heeft daarom een hogere hit-rate dan L1.
+Sommige processors hebben zelfs een L4 cache: bijvoorbeeld de Intel Core i7 4770R uit 2013 (128MB).
+
