@@ -52,4 +52,10 @@ legend(25, 6000,  # Plot legend
        lwd = 2,
        bty = "n"
        )
+df
+df[1, 1:8] #patched
+df[2, 1:8] #vulnerable
+sd(df[1, 1:8])
+sd(df[2, 1:8])
 
+t.test(df[1, 1:8], df[2, 1:8])

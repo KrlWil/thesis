@@ -31,3 +31,8 @@ legend(200, 24,  # Plot legend
        lty = 1,
        lwd = 2)
 
+sd(ms_patched)
+sd(ms_vulnerable)
+
+t.test(ms_patched, ms_vulnerable)
+

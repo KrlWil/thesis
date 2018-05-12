@@ -35,3 +35,9 @@ legend(150, 200,  # Plot legend
        col = c("blue", "red"),
        lty = 1,
        lwd = 2)
+
+sd(mspatched$resp_time_192.168.33.100)
+sd(msvulnerable$resp_time_192.168.33.101)
+
+t.test(mspatched$resp_time_192.168.33.100, msvulnerable$resp_time_192.168.33.101)
+
