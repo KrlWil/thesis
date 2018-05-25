@@ -25,35 +25,36 @@
   year = {2009}
 }
 
-@TechReport{Kocher,
-  author  = {Paul Kocher , Daniel Genkin , Daniel Gruss},
+@TechReport{Kocher2018,
+  author  = {Kocher, Paul and Genkin, Daniel and Gruss, Daniel},
   title   = {Spectre Attacks: Exploiting Speculative Execution},
+  year    = {2018},
   address = {https://spectreattack.com/spectre.pdf},
 }
 
 @Online{Stokes2009,
-  author = {Jon Stokes},
+  author = {Stokes, Jon},
   title  = {Intel launches all-new PC architecture with Core i5/i7 CPUs},
   date   = {2009-09-09},
   url    = {https://arstechnica.com/gadgets/2009/09/intel-launches-all-new-pc-architecture-with-core-i5i7-cpus/},
 }
 
 @Online{Luijtgaarden2018,
-  author = {Mark van de Luijtgaarden},
+  author = {van de Luijtgaarden, Mark},
   title  = {Microsoft en Intel brengen Spectre-patch voor Windows 10 uit: BIOS-updates overbodig},
   year   = {2018},
   url    = {https://be.hardware.info/nieuws/55469/microsoft-en-intel-brengen-spectre-patch-voor-windows-10-uit-bios-updates-overbodig},
 }
 
 @Online{Turner2018,
-  author = {Paul Turner},
+  author = {Turner, Paul},
   title  = {Retpoline: a software construct for preventing branch-target-injection},
   year   = {2018},
   url    = {https://support.google.com/faqs/answer/7625886},
 }
 
 @TechReport{Intel2018,
-  author = {Intel},
+  author = {{Intel}},
   title  = {Speculative Execution Side Channel Mitigations},
   year   = {2018},
   url    = {https://software.intel.com/sites/default/files/managed/c5/63/336996-Speculative-Execution-Side-Channel-Mitigations.pdf},
@@ -62,7 +63,7 @@
 @Proceedings{Shacham2007,
   title  = {The Geometry of Innocent Flesh on the Bone: Return-into-libc without Function Calls (on the x86)},
   year   = {2007},
-  editor = {Hovav Shacham},
+  editor = {Shacham, Hovav},
 }
 
 @Online{KernelNewbies2004,
@@ -73,14 +74,14 @@
 }
 
 @Book{Patterson2012,
-  author  = {David A. Patterson, John L. Hennessey},
+  author  = {David A. Patterson and John L. Hennessey},
   title   = {Computer Organization and Design},
   year    = {2012},
   edition = {4},
 }
 
 @Book{Touhafi2011,
-  author = {Abdellah Touhafi, An Braeken, Gianluca Cornetta, Nele Mentens, Kris Steenhaut},
+  author = {Touhafi, Abdellah and Braeken, An and Cornetta, Gianluca and Mentens, Nele and Steenhaut, Kris},
   title  = {Secure Techniques for Remote Reconfiguration of Wireless Embedded Systems},
   year   = {2011},
 }
@@ -93,7 +94,7 @@
 }
 
 @Book{Katzan1971,
-  author = {Harry Katzan},
+  author = {Katzan, Harry},
   title  = {Computer Organization and the System/370},
   year   = {1971},
 }
@@ -113,7 +114,7 @@
 }
 
 @Book{Freund1999,
-  author = {Yoav Freund, Robert Elias Schapire},
+  author = {Freund, Yoav and Schapire, Robert Elias},
   title  = {Large margin classification using the perceptron algorithm},
   year   = {1999},
 }
@@ -125,33 +126,33 @@
 }
 
 @Article{Redhat2018,
-  author = {Redhat},
+  author = {{Redhat}},
   title  = {Speculative Execution Exploit Performance Impacts - Describing the performance impacts to security patches for CVE-2017-5754 CVE-2017-5753 and CVE-2017-5715},
   year   = {2018},
 }
 
-@Online{Chen2018,
-  author = {Guoxing Chen, Sanchuan Chen, Yuan Xiao, Yinqian Zhang, Zhiqiang Lin, Ten H. Lai},
+@Article{Chen2018,
+  author = {Chen, Guoxing and Sanchuan, Chen and Yuan, Xiao and Yinqian, Zhang and Zhiqiang, Lin and Ten, H. Lai},
   title  = {SGXPECTRE Attacks: Leaking Enclave Secrets via Speculative Execution},
   year   = {2018},
 }
 
 @Online{Tian2018,
-  author = {Dave Tian},
+  author = {Tian, Dave},
   title  = {Spectre attack against SGX enclave},
   year   = {2018},
   url    = {https://github.com/lsds/spectre-attack-sgx},
 }
 
 @Online{Intel2018a,
-  author = {Intel},
+  author = {{Intel}},
   title  = {Microcode Revision Guidance},
   year   = {2018},
   url    = {https://newsroom.intel.com/wp-content/uploads/sites/11/2018/04/microcode-update-guidance.pdf},
 }
 
 @Online{Lee2017,
-  author = {Ben Lee},
+  author = {Lee, Ben},
   title  = {Dynamic Branch Prediction},
   year   = {2017},
 }
@@ -163,25 +164,25 @@
 }
 
 @Book{Yeh1991,
-  author = {Tse-Yu Yeh},
+  author = {Yeh, Tse-Yu},
   title  = {Two-Level Adaptive Training Branch Prediction},
   year   = {1991},
 }
 
 @Book{Lee1984,
-  author = {J. Lee, A.J. Smith},
+  author = {J. Lee and A.J. Smith},
   title  = {Branch Prediction Strategies and Branch Target Buffer Design},
   year   = {1984},
 }
 
 @Book{Sinnadurai2008,
-  author = {Sinnadurai, Saravanan; Zhao, Qin; Wong, Weng Fai},
+  author = {Sinnadurai, Saravanan and Zhao, Qin and Wong, Weng Fai},
   title  = {"Transparent runtime shadow stack: Protection against malicious return address modifications},
   year   = {2008},
 }
 
 @Book{Lee2001,
-  author = {Donghee Lee; Jongmoo Choi; Jong-Hun Kim; Noh, S.H.; Sang Lyul Min; Yookun Cho; Chong Sang Kim},
+  author = {Donghee, Lee},
   title  = {LRFU: a spectrum of policies that subsumes the least recently used and least frequently used policies},
   year   = {2001},
 }
@@ -193,7 +194,7 @@
 }
 
 @Book{Osvik2006,
-  author = {Osvik, D. A., Shamir, A., Tromer, E.},
+  author = {Osvik, D. A. and Shamir, A. and Tromer, E.},
   title  = {Cache attacks and countermeasures: The case of AES.},
   year   = {2006},
 }
@@ -217,10 +218,29 @@
 }
 
 @Book{Nielsen1993,
-  author = {Jakob Nielsen},
+  author = {Nielsen, Jakob},
   title  = {Usability Engineering},
   year   = {1993},
   url    = {https://www.nngroup.com/articles/response-times-3-important-limits/},
+}
+
+@Article{Redhat2018a,
+  author = {{Redhat}},
+  title  = {Controlling the Performance Impact of Microcode and Security Patches for CVE-2017-5754 CVE-2017-5715 and CVE-2017-5753 using Red Hat Enterprise Linux Tunables},
+  year   = {2018},
+  url    = {https://access.redhat.com/articles/3311301},
+}
+
+@InProceedings{Delgado2013,
+  author = {Brian Delgado and Karen L. Karavanic},
+  title  = {Performance Implications of System Management Mode},
+  year   = {2013},
+}
+
+@Article{Schmidt2018,
+  author = {Jürgen Schmidt},
+  title  = {Super-GAU für Intel: Weitere Spectre-Lücken im Anflug},
+  date   = {2018-05-25},
 }
 
 @Comment{jabref-meta: databaseType:biblatex;}

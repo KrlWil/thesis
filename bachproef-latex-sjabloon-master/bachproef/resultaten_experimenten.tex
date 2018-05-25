@@ -1,10 +1,10 @@
-\chapter{Onderzoek}
-In dit hoofdstuk gaan we kijken hoe de mitigaties de performantie van verschillende webservices beïnvloeden.\\
-Het vergelijken wordt vooraf gegaan met een t-test, die duidelijk zal maken of het verschil statistisch significant is. Hiervoor wordt de alpha-waarde als standaard genomen: 0,05. De p-waarde moet kleiner zijn als de alpha-waarde om met zekerheid te zeggen dat de meetresultaten betrouwbaar zijn.
+\chapter{Resultaten Experimenten}
+In dit hoofdstuk gaan we kijken hoe de risicobeperkende maatregelen de performantie van verschillende webservices beïnvloeden.
+Het vergelijken wordt vooraf gegaan door een t-test, die duidelijk zal maken of het verschil statistisch significant is. Hiervoor wordt de alpha-waarde als standaard genomen: 0,05. De p-waarde moet kleiner zijn als de alpha-waarde, om met zekerheid te zeggen dat de meetresultaten betrouwbaar zijn.
 
 \section{CPU gebruik}
-De belasting werd gegenereert door autobench met 40 verzoeken per seconde voor een totaal van 4500 verzoeken.\\
-Het CPU gebruik werdt opgeslaan elke seconde voor 90 seconden met vmstat.\\
+De belasting werd gegenereerd door autobench met 40 verzoeken per seconde voor een totaal van 4500 verzoeken.
+Het CPU gebruik werd opgeslaan elke seconde voor 90 seconden met vmstat.
 Het vmstat commando wordt naar de webservers gedelegeerd.
 
 
@@ -72,22 +72,25 @@ Het vmstat commando wordt naar de webservers gedelegeerd.
 \end{table}
 
 
-De grafiek op figuur \ref{fig:cpu_usage} is berekend met het vmstat commando.\\
+De grafiek op figuur \ref{fig:cpu_usage} is berekend met het vmstat commando.
+
 Elke seconde slaat vmstat het processor gebruik op voor zowel 'user CPU' en 'sys CPU'.
-Het verschil is of de applicatie tijd heeft doorgebracht in gebruikersruimte (user space) of kernelruimte (kernel space).\\
-Systeemtijd (system calls) is tijd besteed aan het uitvoeren van code in de kernel van het besturingssysteem namens de applicatie.\\
-Het gemiddelde van het ongepatchte systeem is 41,10\%, het gemiddelde van het gepatchte systeem is 59,13\%. Dit is een stijging van 43,87\%.\\
+Het verschil is of de applicatie tijd heeft doorgebracht in gebruikersruimte (user space) of kernelruimte (kernel space).
+Systeemtijd (system calls) is tijd besteed aan het uitvoeren van code in de kernel van het besturingssysteem namens de applicatie.
 
-Het verbruik in gebruikersruimte is gestegen van 25,88\% naar 41,08\%, een stijging van 58,73\%(figuur \ref{fig:cpu_user}).\\
-Het verbruik in kernelruimte is gestegen van 15,22\% naar 18,06\%, een stijging van 18,66\%(figuur \ref{fig:cpu_system}).\\
+Het gemiddelde van het ongepatchte systeem is 41,10\%, het gemiddelde van het gepatchte systeem is 59,13\%. Dit is een stijging van 43,87\%.
 
-Met de retpoline patch heeft dit systeem veel moeite. Branch prediction speelt een grote rol op deze CPU.\\
+Het verbruik in gebruikersruimte is gestegen van 25,88\% naar 41,08\%, een stijging van 58,73\%(figuur \ref{fig:cpu_user}).
 
-Het is dus duidelijk te zien dat overgangen van gebruikersruimte naar kernelruimte meer lijden onder de patches.\\
+Het verbruik in kernelruimte is gestegen van 15,22\% naar 18,06\%, een stijging van 18,66\%(figuur \ref{fig:cpu_system}).
+
+Met de retpoline patch heeft dit systeem veel moeite. Branch prediction speelt een grote rol op deze CPU.
+
+Het is dus duidelijk te zien dat overgangen van gebruikersruimte naar kernelruimte meer lijden onder de patches.
 Herinner wel dat het effect wordt verergerd door de hypervisor van virtualbox.
 
 
-Elke p-waarde is kleiner dan de corresponderende alpha-waarde, er is dus bij elke test een statistisch
+Elke p-waarde is kleiner dan de corresponderende alpha-waarde (0,05), er is dus bij elke test een statistisch
 significant verschil gevonden.
 
 
@@ -137,25 +140,28 @@ significant verschil gevonden.
 \end{table}
 
 
-Figuur \ref{fig:ms_conc} werd verkregen door de latentie te berekenen voor een bepaald aantal van gelijktijdige verbindingen.\\
-De gelijktijdige verbindingen lopen uiteen van 20 tot 240 met stappen van 2.\\ 
-De gebruikte tool heet 'autobench'.\\
-Een voordeel van het geleidelijk aan simultane verbindingen kunnen verzenden is dat er geen onafhankelijke tests moeten uitgevoerd worden voor het breekpunt te bepalen.\\
-Deze probleemoplossende strategie wordt 'guess-and-check tests' genoemd.\\
-Deze methode neemt veel tijd in en is zeer omslachtig.\\
-Maar de kans is ook groot dat de resultaten niet weergeven of de applicatie ongunstig reageert.\\
+Figuur \ref{fig:ms_conc} werd verkregen door de latentie te berekenen voor een bepaald aantal van gelijktijdige verbindingen.
 
-Jakob Nielsens heeft onderzocht wat een aanvaardbare responstijd is voor elke toepassing (websites zijn in dit opzicht niet speciaal).\\
-Jakob zegt dat 0,1 seconde ongeveer het limiet is om de gebruiker het gevoel te geven dat het systeem onmiddellijk reageert, één seconde is ongeveer de limiet voor de gedachtestroom van de gebruiker om ononderbroken te blijven, ook al merkt de gebruiker de vertraging op.\\
+De gelijktijdige verbindingen lopen uiteen van 20 tot 240 met stappen van 2. 
+De gebruikte tool heet 'autobench'.
+
+Een voordeel van het geleidelijk aan, simultane verbindingen kunnen verzenden, is dat er geen onafhankelijke tests moeten uitgevoerd worden voor het breekpunt te bepalen.
+Deze probleemoplossende strategie wordt 'guess-and-check tests' genoemd.
+Deze methode neemt veel tijd in beslag en is zeer omslachtig.
+Maar de kans is ook groot dat de resultaten niet weergeven of de applicatie ongunstig reageert.
+
+Jakob Nielsen heeft onderzocht wat een aanvaardbare responstijd is voor elke toepassing (websites zijn in dit opzicht niet speciaal).
+Nielsens zegt dat 0,1 seconde ongeveer het limiet is om de gebruiker het gevoel te geven dat het systeem onmiddellijk reageert, één seconde is ongeveer de limiet voor de gedachtestroom van de gebruiker om ononderbroken te blijven, ook al merkt de gebruiker de vertraging op.
 En tien seconden is ongeveer de limiet om de aandacht van de gebruiker gericht te houden \parencite{Nielsen1993}.
 
-Het systeem met patches kan 66 gelijktijdige verbindingen aan voor een responstijd van minder dan 0,1 seconde.\\
-Het systeem zonder patches 72 gelijktijdige verbindingen aan.\\
+Het systeem met patches kan 66 gelijktijdige verbindingen aan voor een responstijd van minder dan 0,1 seconde.
+Het systeem zonder patches kan 72 gelijktijdige verbindingen aan.
 De p-waarde van de resultaten zijn 0,0001499, dus het resultaat is statistisch betrouwbaar.
 
 
-De resultaten van figuur \ref{fig:ms_patched_vuln} werden gemaakt met de Apache HTTP server benchmarking tool (ab).\\
-Het gemiddelde van het systeem met de patches is 15,62 milliseconden, van het systeem zonder patches is het 14,77, een verschil van 5\%.\\
+De resultaten van figuur \ref{fig:ms_patched_vuln} werden gemaakt met de Apache HTTP server benchmarking tool (ab).
+
+Het gemiddelde van het systeem met de patches is 15,62 milliseconden, van het systeem zonder patches is het 14,77, een verschil van 5\%.
 De p-waarde is ruim onder de 5\%.
 
 
@@ -181,10 +187,10 @@ De p-waarde is ruim onder de 5\%.
 \end{table}
 
 
-De resultaten van redis (figuur \ref{fig:redis} ) zijn berekent met 'redis-benchmark', een hulpprogramma opgenomen in Redis.\\
+De resultaten van redis (figuur \ref{fig:redis} ) zijn berekend met 'redis-benchmark', een hulpprogramma opgenomen in Redis.
 
-Het systeem met patches verliest 3,4\% performantie.\\
-Helaas is de p-waarde (tabel \ref{fig:t_redis}) net niet laag genoeg om met zekerheid te zeggen dat de resultaten betekenisvol zijn.
+Het systeem met patches verliest 3,4\% performantie.
+Helaas is de p-waarde (tabel \ref{t_redis}) net niet laag genoeg om met zekerheid te zeggen dat de resultaten betekenisvol zijn.
 
 
 
@@ -193,7 +199,7 @@ Helaas is de p-waarde (tabel \ref{fig:t_redis}) net niet laag genoeg om met zeke
 
 \begin{figure}
 	\includegraphics[width=1.0\linewidth]{img/rps.png}
-	\caption{Doorvoorsnelheid}
+	\caption{Doorvoersnelheid}
 	\label{fig:rps}
 \end{figure}
 
@@ -210,6 +216,7 @@ Helaas is de p-waarde (tabel \ref{fig:t_redis}) net niet laag genoeg om met zeke
 	\end{tabular}
 \end{table}
 
-De doorvoersnelheid werd met dezelfde methode berekent als de responstijd (20 tot 240 gelijktijdige verbindingen met stappen van 2).\\
-Het systeem met de patches heeft een doorvoersnelheid van 54 verzoeken per seconde, het systeem zonder patches een doorvoersnelheid van 58 (figuur \ref{fig:rps}).\\
-Dit is een verlies van 7 percent.\\
+De doorvoersnelheid werd met dezelfde methode berekend als de responstijd (20 tot 240 gelijktijdige verbindingen met stappen van 2).
+
+Het systeem met de patches heeft een doorvoersnelheid van 54 verzoeken per seconde, het systeem zonder patches een doorvoersnelheid van 58 (figuur \ref{fig:rps}).
+Dit is een verlies van 7 procent.

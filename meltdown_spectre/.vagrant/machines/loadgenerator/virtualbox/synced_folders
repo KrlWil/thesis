@@ -1,1 +1,1 @@
-{"virtualbox":{"/vagrant":{"guestpath":"/vagrant","hostpath":"/home/karel/vagrantfiles/meltdown_spectre","disabled":false,"__vagrantfile":true}}}
+{"virtualbox":{"/vagrant":{"guestpath":"/vagrant","hostpath":"/home/karel/thesis/meltdown_spectre","disabled":false,"__vagrantfile":true}}}

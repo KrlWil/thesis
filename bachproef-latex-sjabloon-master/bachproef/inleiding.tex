@@ -2,13 +2,13 @@
 %% Inleiding
 %%=============================================================================
 
-\chapter*{Inleiding}
+\chapter{Inleiding}
 \label{ch:inleiding}
 
 % De inleiding moet de lezer net genoeg informatie verschaffen om het onderwerp te begrijpen en % in te zien waarom de onderzoeksvraag de moeite waard is om te onderzoeken. In de inleiding ga % je literatuurverwijzingen beperken, zodat de tekst vlot leesbaar blijft. Je kan de inleiding % verder onderverdelen in secties als dit de tekst verduidelijkt. Zaken die aan bod kunnen % komen in de inleiding~\autocite{Pollefliet2011}:
 
-Het onderzoek zal bestaan uit een vergelijkende studie tussen een webserver met spectre/meltdown patches en een webserver zonder deze patches.
-Er zal onderzocht worden als er een groot performantieverschil is bij het gebruik van de patches.
+Het onderzoek zal bestaan uit een vergelijkende studie tussen een webserver met Spectre/Meltdown patches en een webserver zonder deze patches.
+Er zal onderzocht worden of een groot performantieverschil is bij het gebruik van de patches.
 
 % \begin{itemize}
 %   \item context, achtergrond
@@ -24,9 +24,10 @@ Er zal onderzocht worden als er een groot performantieverschil is bij het gebrui
 \label{sec:probleemstelling}
 
 % Uit je probleemstelling moet duidelijk zijn dat je onderzoek een meerwaarde heeft voor een concrete doelgroep. De doelgroep moet goed gedefinieerd en afgelijnd zijn. Doelgroepen als ``bedrijven,'' ``KMO's,'' systeembeheerders, enz.~zijn nog te vaag. Als je een lijstje kan maken van de personen/organisaties die een meerwaarde zullen vinden in deze bachelorproef (dit is eigenlijk je steekproefkader), dan is dat een indicatie dat de doelgroep goed gedefinieerd is. Dit kan een enkel bedrijf zijn of zelfs één persoon (je co-promotor/opdrachtgever).
-In januari 2018 zijn verslagen publiek gemaakt dat er bugs bestaan in apparaten van de afgelopen 20 jaar. De 9de generatie Intel 'Ice Lake' processors zullen 'in-silicon' mitigaties hebben, maar deze zijn beschikbaar in 2019.
+In januari 2018 zijn verslagen publiek gemaakt \parencite{Kocher2018} dat er bugs op het vlak van beveiliging bestaan in apparaten van de afgelopen 20 jaar. De 9de generatie Intel 'Ice Lake' processors zullen hardwarematige oplossingen hebben, maar deze zijn beschikbaar in 2019.
+
 Nieuwe processors zijn echter duur, dus het is niet vanzelfsprekend om nieuwe te kopen.
-Wie in de markt is voor een nieuwe processor kan nu kopen of tot 2019 wachten.
+Wie in de markt is voor een nieuwe processor, kan nu kopen of tot 2019 wachten.
 Deze studie moet duidelijke resultaten geven of er een drastisch verschil is voor webapplicaties.
 
 
@@ -35,7 +36,9 @@ Deze studie moet duidelijke resultaten geven of er een drastisch verschil is voo
 
 % Wees zo concreet mogelijk bij het formuleren van je onderzoeksvraag. Een onderzoeksvraag is trouwens iets waar nog niemand op dit moment een antwoord heeft (voor zover je kan nagaan). Het opzoeken van bestaande informatie (bv. ``welke tools bestaan er voor deze toepassing?'') is dus geen onderzoeksvraag. Je kan de onderzoeksvraag verder specifiëren in deelvragen. Bv.~als je onderzoek gaat over performantiemetingen, dan 
 
-De onderzoeksvraag die moet beantwoord zijn in deze studie is: \\ \\ "Is er een groot performantieverschil met de spectre/meltdown patches op een webserver"
+De onderzoeksvraag die moet beantwoord worden in deze studie is: 
+
+``Is er een groot performantieverschil met de Spectre/Meltdown patches op een Linux webserver''
 
 
 \section{Onderzoeksdoelstelling}
@@ -58,7 +61,7 @@ In Hoofdstuk~\ref{ch:stand-van-zaken} wordt een overzicht gegeven van de stand v
 
 In Hoofdstuk~\ref{ch:methodologie} wordt de methodologie toegelicht en worden de gebruikte onderzoekstechnieken besproken om een antwoord te kunnen formuleren op de onderzoeksvragen.
 
-% TODO: Vul hier aan voor je eigen hoofstukken, één of twee zinnen per hoofdstuk
+% TODO: Vul hier aan voor je eigen hoofdstukken, één of twee zinnen per hoofdstuk
 
 In Hoofdstuk~\ref{ch:conclusie}, tenslotte, wordt de conclusie gegeven en een antwoord geformuleerd op de onderzoeksvragen. Daarbij wordt ook een aanzet gegeven voor toekomstig onderzoek binnen dit domein.
 

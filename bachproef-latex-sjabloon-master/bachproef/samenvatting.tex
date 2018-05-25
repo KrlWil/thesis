@@ -38,3 +38,27 @@
 \chapter*{\IfLanguageName{dutch}{Samenvatting}{Abstract}}
 
 % \lipsum[1-4]
+Dit werk is een studie van het performantieverschil van de Meltdown en Spectre patches op een Linux webserver.
+Om dit uit te testen werd er met Vagrant en Ansible een testopstelling opgezet, om gemakkelijk resultaten te genereren.
+Het resultaat is data van een aantal benchmark en monitoring tools.
+Aan de hand van t-testen worden de resultaten onderzocht, en er wordt gezien of ze statistisch significant zijn.
+
+In dit document vind je achtergrond over hoe de Spectre/Meltdown aanvallen werken, en hoe risicobeperkende maatregelen de performantie kunnen beïnvloeden.
+De resultaten duiden aan dat in de meeste applicaties er een significant verschil is.
+Eerst werd er gezien of het processorgebruik tijdens een normale werklast veel verschilt.
+
+Het antwoord was duidelijk, met een verschil van 18 procent.
+De volgende test was op het vlak van responstijd, het verschil was hier redelijk, met 5 procent.
+Redis, een in-memory database verloor maar 3 procent over allerlei andere testen.
+
+Deze bachelorproef bevestigt dat de patches wel degelijk performantieverlies met zich meebrengen. 
+Het performantieverlies voor een webserver is significant, doch niet rampzalig.
+Dit is belangrijk voor webmasters die zich afvragen of ze nu al dan niet meer rekenkracht nodig hebben. De belangrijkste impact zal zijn op werkelijk grootschalige omgevingen zoals cloud-providers, waar zelfs een toename van een paar procenten van de belasting, extra hardware vereist.
+
+De vraag is of de patches nog veel verbeterd kunnen worden, en wat de impact is op het vlak van energieverbruik, dat ook belangrijk is voor cloud-providers.
+
+
+
+
+
+
