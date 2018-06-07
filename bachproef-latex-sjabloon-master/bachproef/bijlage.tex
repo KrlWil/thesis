@@ -1,0 +1,755 @@
+% \documentclass{article}
+
+% \usepackage[dvipsnames]{xcolor}
+% \usepackage{listings}
+
+\newcommand\YAMLcolonstyle{\color{red}\mdseries}
+\newcommand\YAMLkeystyle{\color{black}\bfseries}
+\newcommand\YAMLvaluestyle{\color{blue}\mdseries}
+
+\makeatletter
+%%%% ini
+
+\lstdefinelanguage{Ini}
+{
+	basicstyle=\ttfamily\small,
+	columns=fullflexible,
+	morecomment=[s][\color{Orchid}\bfseries]{[}{]},
+	morecomment=[l]{\#},
+	morecomment=[l]{;},
+	commentstyle=\color{gray}\ttfamily,
+	morekeywords={},
+	otherkeywords={=,:},
+	keywordstyle={\color{green}\bfseries}
+}
+
+
+%%%% ini
+
+
+% here is a macro expanding to the name of the language
+% (handy if you decide to change it further down the road)
+\newcommand\language@yaml{yaml}
+
+\expandafter\expandafter\expandafter\lstdefinelanguage
+\expandafter{\language@yaml}
+{
+	keywords={true,false,null,y,n},
+	keywordstyle=\color{darkgray}\bfseries,
+	basicstyle=\YAMLkeystyle,                                 % assuming a key comes first
+	sensitive=false,
+	comment=[l]{\#},
+	morecomment=[s]{/*}{*/},
+	commentstyle=\color{purple}\ttfamily,
+	stringstyle=\YAMLvaluestyle\ttfamily,
+	moredelim=[l][\color{orange}]{\&},
+	moredelim=[l][\color{magenta}]{*},
+	moredelim=**[il][\YAMLcolonstyle{:}\YAMLvaluestyle]{:},   % switch to value style at :
+	morestring=[b]',
+	morestring=[b]",
+	literate =    {---}{{\ProcessThreeDashes}}3
+	{>}{{\textcolor{red}\textgreater}}1     
+	{|}{{\textcolor{red}\textbar}}1 
+	{\ -\ }{{\mdseries\ -\ }}3,
+}
+
+% switch to key style at EOL
+\lst@AddToHook{EveryLine}{\ifx\lst@language\language@yaml\YAMLkeystyle\fi}
+\makeatother
+
+\newcommand\ProcessThreeDashes{\llap{\color{cyan}\mdseries-{-}-}}
+
+\begin{document}
+\chapter{Bijlage}
+\label{ch:bijlage}
+
+\section{Bijlage Ansible}
+\subsection{Grub file voor het uitschakelen van Spectre/Meltdown patch}
+
+\begin{lstlisting}[language=bash, basicstyle=\footnotesize]
+GRUB_DEFAULT=0
+GRUB_HIDDEN_TIMEOUT=0
+GRUB_HIDDEN_TIMEOUT_QUIET=true
+GRUB_TIMEOUT=0
+GRUB_DISTRIBUTOR=`lsb_release -i -s 2> /dev/null || echo Debian`
+GRUB_CMDLINE_LINUX_DEFAULT="console=tty1 console=tty0 spectre_v2=off nopti"
+GRUB_CMDLINE_LINUX="spectre_v2=off nopti"
+
+\end{lstlisting}
+
+\subsection{Configureren van grub}
+\begin{lstlisting}[language=yaml]
+#copy /etc/default/grub
+- name: copy grub config
+become: yes
+copy:
+src: files/grub
+dest: /etc/default/grub
+owner: root
+group: root
+mode: 0644
+
+
+- name: update grub
+become: yes
+command: update-grub
+
+- name: Restart server
+become: yes
+command: reboot
+ignore_errors: true
+
+
+\end{lstlisting}
+
+\subsection{Setup Apache en Drupal}
+\begin{lstlisting}[language=yaml, breaklines=true]
+---
+# tasks file for drupal.role
+- include_tasks: "setup_apache.yml"
+- include_tasks: "setup_php.yml"
+
+- name: enable libapache2-mod-php5
+become: yes
+command: >
+a2enmod php5
+notify: restart apache
+
+- name: Install drush
+become: yes
+apt: "name=drush state=installed"
+
+
+- name: Install php gd
+become: yes
+apt: "name=php5-gd state=installed"
+
+- name: downloading the last version of drupal into a folder
+command: >
+drush dl drupal-7.57
+
+- name: Install Drupal with drush
+ignore_errors: yes
+command: >
+sudo drush -y site-install --db-url=mysql://root:root@localhost:3306/drupaldb --root="/home/vagrant/drupal-7.57"
+
+- name: Copy vhost
+copy: src=files/000-default.conf dest=/etc/apache2/sites-available/000-default.conf
+#owner=root group=root mode=0644
+
+- name: Copy ssl vhost
+copy: src=files/default-ssl.conf dest=/etc/apache2/sites-available/default-ssl.conf
+#owner=root group=root mode=0644
+
+- name: reload apache.
+command: >
+service apache2 reload
+become: yes
+
+# enable clean urls
+
+- name: enable apache rewrite mod
+become: yes
+command: >
+a2enmod rewrite
+notify: restart apache
+
+\end{lstlisting}
+
+\newpage
+
+
+
+\subsection{Setup MySQL}
+\begin{lstlisting}[language=yaml, breaklines=true]
+# tasks file for mysql.role
+- include_tasks: "setup_mysql.yml"
+
+
+- name: Copy my.cnf global MySQL configuration.
+template:
+src: my.cnf.j2
+dest: "/etc/mysql/my.cnf"
+owner: root
+group: root
+mode: 0644
+notify: restart mysql
+
+
+- name: root password is present
+mysql_user: name=root host={{item}} password={{ mysql_root_password }} state=present
+with_items:
+- '::1'
+- '127.0.0.1'
+- 'localhost'
+
+- name: install .my.cnf with credentials
+template: src=.my.cnf.j2 dest=/root/.my.cnf 
+mode=0400
+
+
+
+- name: Create the directory /etc/mysql/conf.d
+file: path=/etc/mysql/conf.d state=directory
+notify:
+- restart mysql
+
+
+- name: Start the mysql services
+service: name=mysql state=started enabled=yes
+
+- name: Create the database
+become: yes
+mysql_db: name=drupaldb state=present
+
+
+- name: grant
+mysql_user:
+name: drupal
+host: 192.168.33.1
+password: 'drupal'
+priv: '*.*:ALL,GRANT'
+state: present
+
+\end{lstlisting}
+
+
+
+\subsection{Config redis}
+\begin{lstlisting}[language=Ini]
+daemonize yes
+pidfile /var/run/redis.pid
+port {{ redis_port }}
+bind {{ redis_bind }}
+timeout 0
+tcp-keepalive 0
+loglevel notice
+logfile ""
+syslog-enabled {{ syslog_bool }}
+databases {{ databases }}
+save 900 1
+save 300 10
+save 60 10000
+stop-writes-on-bgsave-error yes
+rdbcompression yes
+rdbchecksum yes
+dbfilename {{ dbfilename }}
+dir ./
+slave-serve-stale-data yes
+slave-read-only yes
+repl-disable-tcp-nodelay no
+slave-priority 100
+{% if requirepass %} 
+requirepass {{ redis_pass }}
+{% endif %}
+
+appendonly no
+appendfilename "appendonly.aof"
+appendfsync everysec
+no-appendfsync-on-rewrite no
+auto-aof-rewrite-percentage 100
+auto-aof-rewrite-min-size 64mb
+lua-time-limit 5000
+slowlog-log-slower-than 10000
+slowlog-max-len 128
+notify-keyspace-events ""
+hash-max-ziplist-entries 512
+hash-max-ziplist-value 64
+list-max-ziplist-entries 512
+list-max-ziplist-value 64
+set-max-intset-entries 512
+zset-max-ziplist-entries 128
+zset-max-ziplist-value 64
+activerehashing yes
+client-output-buffer-limit normal 0 0 0
+client-output-buffer-limit slave 256mb 64mb 60
+client-output-buffer-limit pubsub 32mb 8mb 60
+hz 10
+aof-rewrite-incremental-fsync yes
+
+\end{lstlisting}
+
+
+
+
+\section{Bijlage Vagrant}
+\subsection{Vagrantfile}
+\begin{lstlisting}[language=Ruby, breaklines=true]
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+
+serverpatched = 
+{ :hostname => 'webpatched', :ip => '192.168.33.100', :box => 'ubuntu/trusty64' }
+
+
+servervulnerable = 
+{ :hostname => 'webvulnerable', :ip => '192.168.33.101', :box => 'ubuntu/trusty64' }
+
+loadgenerator = 
+{ :hostname => 'loadgenerator', :ip => '192.168.33.102', :box => 'ubuntu/trusty64' }
+
+
+
+Vagrant.configure("2") do |config|
+# The most common configuration options are documented and commented below.
+# For a complete reference, please see the online documentation at
+# https://docs.vagrantup.com.
+
+# Every Vagrant development environment requires a box. You can search for
+# boxes at https://vagrantcloud.com/search.
+#config.vm.box = "ubuntu/artful64"
+
+
+config.vm.define serverpatched[:hostname] do |configpatched|
+	configpatched.vm.box = serverpatched[:box]
+	configpatched.vm.hostname = serverpatched[:hostname]
+	configpatched.vm.network :private_network, ip: serverpatched[:ip]
+end
+
+
+
+config.vm.define servervulnerable[:hostname] do |configvulnerable|
+	configvulnerable.vm.box = servervulnerable[:box]
+	configvulnerable.vm.hostname = servervulnerable[:hostname]
+	configvulnerable.vm.network :private_network, ip: servervulnerable[:ip]
+end
+
+config.vm.define loadgenerator[:hostname] do |configloadgenerator|
+	configloadgenerator.vm.box = loadgenerator[:box]
+	configloadgenerator.vm.hostname = loadgenerator[:hostname]
+	configloadgenerator.vm.network :private_network, ip: loadgenerator[:ip]
+end
+
+
+
+
+# config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
+
+
+
+config.vm.provider "virtualbox" do |vb|
+# Display the VirtualBox GUI when booting the machine
+#vb.gui = true
+
+# Customize the amount of memory on the VM:
+vb.memory = "1024"
+end
+
+
+
+
+config.vm.provision "ansible" do |ansible|
+ansible.compatibility_mode = 'auto'
+    #ansible.verbose = "vvvv"
+	ansible.playbook = "provisioning/playbook.yml"
+	ansible.inventory_path = "provisioning/inventory"
+
+	end
+end
+
+\end{lstlisting}
+
+
+\section{Ruwe resultaten}
+\subsection{Apache benchmark van systeem met patches}
+
+\begin{lstlisting}[caption={Eerste 50 resultaten}, basicstyle=\footnotesize]
+starttime	seconds	ctime	dtime	ttime	wait
+Thu May 03 13:44:42 2018	1525355082	0	14	14	14
+Thu May 03 13:44:35 2018	1525355075	0	14	14	14
+Thu May 03 13:44:35 2018	1525355075	0	14	14	14
+Thu May 03 13:44:40 2018	1525355080	0	14	14	14
+Thu May 03 13:44:45 2018	1525355085	0	14	14	14
+Thu May 03 13:44:46 2018	1525355086	0	14	14	14
+Thu May 03 13:44:39 2018	1525355079	0	14	14	14
+Thu May 03 13:44:45 2018	1525355085	0	14	14	14
+Thu May 03 13:44:39 2018	1525355079	0	14	14	14
+Thu May 03 13:44:46 2018	1525355086	0	14	14	14
+Thu May 03 13:44:45 2018	1525355085	0	14	14	14
+Thu May 03 13:44:37 2018	1525355077	0	14	14	14
+Thu May 03 13:44:42 2018	1525355082	0	14	14	14
+Thu May 03 13:44:37 2018	1525355077	0	14	14	14
+Thu May 03 13:44:45 2018	1525355085	0	14	14	14
+Thu May 03 13:44:38 2018	1525355078	0	14	14	14
+Thu May 03 13:44:36 2018	1525355076	0	14	14	14
+Thu May 03 13:44:33 2018	1525355073	0	14	14	14
+Thu May 03 13:44:40 2018	1525355080	0	14	14	14
+Thu May 03 13:44:46 2018	1525355086	0	14	14	14
+Thu May 03 13:44:40 2018	1525355080	0	14	14	14
+Thu May 03 13:44:45 2018	1525355085	0	14	14	14
+Thu May 03 13:44:45 2018	1525355085	0	14	14	14
+Thu May 03 13:44:36 2018	1525355076	0	14	14	14
+Thu May 03 13:44:33 2018	1525355073	0	14	14	14
+Thu May 03 13:44:40 2018	1525355080	0	14	14	14
+Thu May 03 13:44:40 2018	1525355080	0	14	14	14
+Thu May 03 13:44:46 2018	1525355086	0	14	15	14
+Thu May 03 13:44:35 2018	1525355075	0	14	15	14
+Thu May 03 13:44:45 2018	1525355085	0	14	15	14
+Thu May 03 13:44:47 2018	1525355087	0	14	15	14
+Thu May 03 13:44:45 2018	1525355085	0	14	15	14
+Thu May 03 13:44:36 2018	1525355076	0	14	15	14
+Thu May 03 13:44:35 2018	1525355075	0	14	15	14
+Thu May 03 13:44:43 2018	1525355083	0	14	15	14
+Thu May 03 13:44:45 2018	1525355085	0	14	15	14
+Thu May 03 13:44:37 2018	1525355077	0	14	15	14
+Thu May 03 13:44:35 2018	1525355075	0	14	15	14
+Thu May 03 13:44:41 2018	1525355081	0	14	15	14
+Thu May 03 13:44:43 2018	1525355083	0	14	15	14
+Thu May 03 13:44:47 2018	1525355087	0	14	15	14
+Thu May 03 13:44:43 2018	1525355083	0	14	15	14
+Thu May 03 13:44:38 2018	1525355078	1	14	15	14
+Thu May 03 13:44:45 2018	1525355085	0	14	15	14
+Thu May 03 13:44:37 2018	1525355077	0	14	15	14
+Thu May 03 13:44:47 2018	1525355087	0	14	15	14
+Thu May 03 13:44:34 2018	1525355074	0	14	15	14
+Thu May 03 13:44:47 2018	1525355087	0	14	15	14
+Thu May 03 13:44:37 2018	1525355077	0	14	15	14
+Thu May 03 13:44:45 2018	1525355085	0	14	15	14
+
+
+\end{lstlisting}
+
+
+\subsection{Apache benchmark van systeem zonder patches}
+
+\begin{lstlisting}[caption={Eerste 50 resultaten}, basicstyle=\footnotesize]
+starttime	seconds	ctime	dtime	ttime	wait
+Thu May 03 13:44:52 2018	1525355092	0	10	11	10
+Thu May 03 13:44:49 2018	1525355089	0	12	12	12
+Thu May 03 13:44:55 2018	1525355095	0	13	13	13
+Thu May 03 13:44:51 2018	1525355091	0	13	13	13
+Thu May 03 13:44:48 2018	1525355088	0	13	13	13
+Thu May 03 13:44:53 2018	1525355093	0	13	13	13
+Thu May 03 13:44:52 2018	1525355092	0	13	13	13
+Thu May 03 13:44:59 2018	1525355099	0	13	13	13
+Thu May 03 13:44:53 2018	1525355093	0	13	13	13
+Thu May 03 13:44:51 2018	1525355091	0	13	13	13
+Thu May 03 13:45:02 2018	1525355102	0	13	13	13
+Thu May 03 13:44:52 2018	1525355092	0	13	13	13
+Thu May 03 13:44:58 2018	1525355098	0	13	13	13
+Thu May 03 13:44:52 2018	1525355092	0	13	13	13
+Thu May 03 13:44:49 2018	1525355089	0	13	13	13
+Thu May 03 13:44:59 2018	1525355099	0	13	13	13
+Thu May 03 13:44:52 2018	1525355092	0	13	13	13
+Thu May 03 13:45:01 2018	1525355101	0	13	13	13
+Thu May 03 13:44:53 2018	1525355093	0	13	13	13
+Thu May 03 13:44:55 2018	1525355095	0	13	13	13
+Thu May 03 13:44:59 2018	1525355099	0	13	13	13
+Thu May 03 13:44:48 2018	1525355088	0	13	13	13
+Thu May 03 13:44:54 2018	1525355094	0	13	13	13
+Thu May 03 13:44:52 2018	1525355092	0	13	13	13
+Thu May 03 13:44:55 2018	1525355095	0	13	13	13
+Thu May 03 13:44:52 2018	1525355092	0	13	13	13
+Thu May 03 13:44:59 2018	1525355099	0	13	13	13
+Thu May 03 13:44:51 2018	1525355091	0	13	13	13
+Thu May 03 13:44:59 2018	1525355099	0	13	13	13
+Thu May 03 13:44:54 2018	1525355094	0	13	13	13
+Thu May 03 13:45:02 2018	1525355102	0	13	13	13
+Thu May 03 13:44:49 2018	1525355089	0	13	13	13
+Thu May 03 13:44:52 2018	1525355092	0	13	13	13
+Thu May 03 13:44:59 2018	1525355099	0	13	13	13
+Thu May 03 13:44:53 2018	1525355093	0	13	13	13
+Thu May 03 13:44:52 2018	1525355092	0	13	13	13
+Thu May 03 13:44:48 2018	1525355088	0	13	13	13
+Thu May 03 13:44:56 2018	1525355096	0	13	13	13
+Thu May 03 13:44:53 2018	1525355093	0	13	13	13
+Thu May 03 13:44:48 2018	1525355088	0	13	13	13
+Thu May 03 13:44:52 2018	1525355092	0	13	13	13
+Thu May 03 13:44:54 2018	1525355094	0	13	13	13
+Thu May 03 13:44:57 2018	1525355097	0	13	13	13
+Thu May 03 13:44:51 2018	1525355091	0	13	13	13
+Thu May 03 13:44:54 2018	1525355094	0	13	13	13
+Thu May 03 13:44:58 2018	1525355098	0	13	13	13
+Thu May 03 13:44:59 2018	1525355099	0	13	13	13
+Thu May 03 13:44:52 2018	1525355092	0	13	13	13
+Thu May 03 13:44:54 2018	1525355094	0	13	13	13
+Thu May 03 13:44:52 2018	1525355092	0	13	13	13
+
+\end{lstlisting}
+
+
+\subsection{Autobench benchmark van systeem met patches}
+
+\begin{lstlisting}[caption={Eerste 50 resultaten}, basicstyle=\footnotesize]
+dem_req_rate	req_rate_192.168.33.100	con_rate_192.168.33.100	min_rep_rate_192.168.33.100	avg_rep_rate_192.168.33.100	max_rep_rate_192.168.33.100	stddev_rep_rate_192.168.33.100	resp_time_192.168.33.100	net_io_192.168.33.100	errors_192.168.33.100
+20	20.3	20.3	0.0	0.0	0.0	0.0	454.6	158.0	0
+22	22.3	22.3	0.0	0.0	0.0	0.0	16.7	173.8	0
+24	24.3	24.3	0.0	0.0	0.0	0.0	16.3	189.4	0
+26	26.3	26.3	0.0	0.0	0.0	0.0	14.4	204.8	0
+28	28.3	28.3	0.0	0.0	0.0	0.0	15.6	220.7	0
+30	30.3	30.3	0.0	0.0	0.0	0.0	14.9	236.3	0
+32	32.3	32.3	0.0	0.0	0.0	0.0	14.7	251.9	0
+34	34.3	34.3	0.0	0.0	0.0	0.0	14.9	267.4	0
+36	36.3	36.3	0.0	0.0	0.0	0.0	14.9	283.2	0
+38	38.3	38.3	0.0	0.0	0.0	0.0	14.9	298.4	0
+40	40.1	40.1	0.0	0.0	0.0	0.0	14.5	312.7	0
+42	42.3	42.3	0.0	0.0	0.0	0.0	14.5	329.7	0
+44	44.3	44.3	0.0	0.0	0.0	0.0	15.1	345.3	0
+46	46.3	46.3	0.0	0.0	0.0	0.0	15.1	360.9	0
+48	48.3	48.3	0.0	0.0	0.0	0.0	15.0	376.5	0
+50	50.2	50.2	0.0	0.0	0.0	0.0	14.7	391.5	0
+52	52.2	52.2	0.0	0.0	0.0	0.0	14.5	406.9	0
+54	54.2	54.2	0.0	0.0	0.0	0.0	14.6	422.7	0
+56	56.1	56.1	0.0	0.0	0.0	0.0	14.6	437.5	0
+58	58.2	58.2	0.0	0.0	0.0	0.0	14.9	453.3	0
+60	60.1	60.1	0.0	0.0	0.0	0.0	14.8	468.4	0
+62	60.2	60.2	0.0	0.0	0.0	0.0	35.8	469.5	0
+64	59.8	59.8	0.0	0.0	0.0	0.0	92.6	466.2	0
+66	60.8	60.8	0.0	0.0	0.0	0.0	83.5	474.0	0
+68	59.7	59.7	0.0	0.0	0.0	0.0	110.2	465.6	0
+70	57.4	57.4	0.0	0.0	0.0	0.0	144.9	447.0	0
+72	54.6	54.6	0.0	0.0	0.0	0.0	166.4	425.8	0
+74	54.9	54.9	0.0	0.0	0.0	0.0	180.3	427.7	0
+76	52.6	52.6	0.0	0.0	0.0	0.0	344.9	409.8	0
+78	41.8	41.8	0.0	0.0	0.0	0.0	637.4	326.1	0
+80	56.2	56.2	0.0	0.0	0.0	0.0	330.3	437.9	0
+82	57.7	57.7	0.0	0.0	0.0	0.0	317.0	449.4	0
+84	56.8	56.8	0.0	0.0	0.0	0.0	351.7	442.5	0
+86	56.1	56.1	0.0	0.0	0.0	0.0	374.2	437.4	0
+88	57.0	57.0	0.0	0.0	0.0	0.0	366.0	444.0	0
+90	57.6	57.6	0.0	0.0	0.0	0.0	363.0	448.7	0
+92	56.6	56.6	0.0	0.0	0.0	0.0	375.1	441.2	0
+94	55.0	55.0	0.0	0.0	0.0	0.0	388.3	428.7	0
+96	52.9	52.9	0.0	0.0	0.0	0.0	454.6	412.0	0
+98	53.7	53.7	0.0	0.0	0.0	0.0	504.9	418.3	0
+100	49.7	49.7	0.0	0.0	0.0	0.0	597.0	387.4	0
+102	57.0	57.0	0.0	0.0	0.0	0.0	476.2	444.1	0
+104	57.9	57.9	0.0	0.0	0.0	0.0	469.7	451.5	0
+106	58.0	58.0	0.0	0.0	0.0	0.0	489.1	452.2	0
+108	57.3	57.3	0.0	0.0	0.0	0.0	503.6	446.6	0
+110	57.2	57.2	0.0	0.0	0.0	0.0	503.1	445.9	0
+112	56.4	56.4	0.0	0.0	0.0	0.0	506.0	439.6	0
+114	57.7	57.7	0.0	0.0	0.0	0.0	511.0	450.1	0
+116	55.9	55.9	0.0	0.0	0.0	0.0	556.6	435.4	0
+118	56.9	56.9	0.0	0.0	0.0	0.0	537.6	443.4	0
+
+
+\end{lstlisting}
+
+
+\subsection{Autobench benchmark van systeem zonder patches}
+
+\begin{lstlisting}[caption={Eerste 50 resultaten}, basicstyle=\footnotesize]
+dem_req_rate	req_rate_192.168.33.101	con_rate_192.168.33.101	min_rep_rate_192.168.33.101	avg_rep_rate_192.168.33.101	max_rep_rate_192.168.33.101	stddev_rep_rate_192.168.33.101	resp_time_192.168.33.101	net_io_192.168.33.101	errors_192.168.33.101
+20	20.3	20.3	0.0	0.0	0.0	0.0	435.2	158.0	0
+22	22.3	22.3	0.0	0.0	0.0	0.0	13.9	173.9	0
+24	24.3	24.3	0.0	0.0	0.0	0.0	14.0	189.5	0
+26	26.3	26.3	0.0	0.0	0.0	0.0	13.7	204.9	0
+28	28.3	28.3	0.0	0.0	0.0	0.0	14.4	220.9	0
+30	30.3	30.3	0.0	0.0	0.0	0.0	14.2	236.3	0
+32	32.4	32.4	0.0	0.0	0.0	0.0	14.4	252.3	0
+34	34.3	34.3	0.0	0.0	0.0	0.0	13.7	267.6	0
+36	36.2	36.2	0.0	0.0	0.0	0.0	14.0	282.0	0
+38	38.4	38.4	0.0	0.0	0.0	0.0	13.6	298.9	0
+40	40.4	40.4	0.0	0.0	0.0	0.0	13.7	314.5	0
+42	42.3	42.3	0.0	0.0	0.0	0.0	13.6	330.0	0
+44	44.3	44.3	0.0	0.0	0.0	0.0	13.9	345.3	0
+46	46.3	46.3	0.0	0.0	0.0	0.0	14.0	360.9	0
+48	48.2	48.2	0.0	0.0	0.0	0.0	13.9	376.0	0
+50	50.2	50.2	0.0	0.0	0.0	0.0	14.0	391.2	0
+52	52.3	52.3	0.0	0.0	0.0	0.0	14.1	407.5	0
+54	54.1	54.1	0.0	0.0	0.0	0.0	14.1	421.5	0
+56	56.2	56.2	0.0	0.0	0.0	0.0	14.1	437.9	0
+58	58.1	58.1	0.0	0.0	0.0	0.0	13.9	452.8	0
+60	60.1	60.1	0.0	0.0	0.0	0.0	14.5	468.5	0
+62	62.1	62.1	0.0	0.0	0.0	0.0	15.2	484.1	0
+64	64.1	64.1	0.0	0.0	0.0	0.0	13.8	499.7	0
+66	66.1	66.1	0.0	0.0	0.0	0.0	13.9	515.0	0
+68	68.0	68.0	0.0	0.0	0.0	0.0	14.2	530.2	0
+70	64.9	64.9	0.0	0.0	0.0	0.0	61.1	505.6	0
+72	64.7	64.7	0.0	0.0	0.0	0.0	83.3	504.5	0
+74	63.0	63.0	0.0	0.0	0.0	0.0	148.9	490.9	0
+76	64.8	64.8	0.0	0.0	0.0	0.0	126.7	504.7	0
+78	62.1	62.1	0.0	0.0	0.0	0.0	158.6	483.9	0
+80	62.2	62.2	0.0	0.0	0.0	0.0	166.7	484.7	0
+82	63.3	63.3	0.0	0.0	0.0	0.0	179.2	493.2	0
+84	60.6	60.6	0.0	0.0	0.0	0.0	252.4	471.9	0
+86	62.5	62.5	0.0	0.0	0.0	0.0	221.0	487.1	0
+88	61.6	61.6	0.0	0.0	0.0	0.0	237.4	480.4	0
+90	61.2	61.2	0.0	0.0	0.0	0.0	249.3	476.9	0
+92	63.0	63.0	0.0	0.0	0.0	0.0	249.1	491.2	0
+94	59.7	59.7	0.0	0.0	0.0	0.0	324.4	465.2	0
+96	62.9	62.9	0.0	0.0	0.0	0.0	290.8	490.2	0
+98	58.1	58.1	0.0	0.0	0.0	0.0	342.8	452.5	0
+100	58.6	58.6	0.0	0.0	0.0	0.0	337.0	456.5	0
+102	57.0	57.0	0.0	0.0	0.0	0.0	348.4	443.9	0
+104	59.8	59.8	0.0	0.0	0.0	0.0	358.2	465.9	0
+106	61.5	61.5	0.0	0.0	0.0	0.0	355.1	479.1	0
+108	61.0	61.0	0.0	0.0	0.0	0.0	361.7	475.4	0
+110	63.3	63.3	0.0	0.0	0.0	0.0	340.2	493.2	0
+112	61.8	61.8	0.0	0.0	0.0	0.0	355.8	481.3	0
+114	62.2	62.2	0.0	0.0	0.0	0.0	363.2	484.5	0
+116	60.4	60.4	0.0	0.0	0.0	0.0	396.0	470.7	0
+118	61.8	61.8	0.0	0.0	0.0	0.0	377.5	481.8	0
+
+\end{lstlisting}
+
+
+\subsection{Redis benchmark van systeem met patches}
+
+\begin{lstlisting}
+"PING_INLINE","5688.28"
+"SET","5740.53"
+"GET","5561.74"
+"INCR","5399.57"
+"LPUSH","5875.44"
+"LPOP","7434.94"
+"SADD","10928.96"
+"SPOP","11389.52"
+
+\end{lstlisting}
+
+\subsection{Redis benchmark van systeem zonder patches}
+
+\begin{lstlisting}
+"PING_INLINE","6729.48"
+"SET","6798.10"
+"GET","6684.49"
+"INCR","6920.42"
+"LPUSH","6891.80"
+"LPOP","6988.12"
+"SADD","6770.48"
+"SPOP","6281.41"
+
+\end{lstlisting}
+
+\newpage
+\subsection{Vmstat tool van systeem met patches}
+
+
+
+\begin{lstlisting}[caption={Eerste 50 resultaten}, basicstyle=\footnotesize]
+procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+11  0      0 334156  25420 382460    0    0   697   511  406 2578 21 10 66  3  0
+3  0      0 325904  25420 382460    0    0     0     0  927 6921 59 28 13  0  0
+3  0      0 330268  25428 382456    0    0     0   120  807 5900 41 20 40  0  0
+3  0      0 335052  25428 382468    0    0     0     0  812 5871 42 16 42  0  0
+2  0      0 339792  25428 382472    0    0     0     0  844 5891 40 17 43  0  0
+1  0      0 339848  25428 382476    0    0     0     0  824 5864 43 17 40  0  0
+0  0      0 339848  25428 382480    0    0     0     0  796 5805 42 14 44  0  0
+0  0      0 339848  25436 382476    0    0     0    12  827 5851 40 17 43  0  0
+0  0      0 339848  25436 382488    0    0     0     0  784 5835 44 13 44  0  0
+1  0      0 339848  25436 382492    0    0     0     0  836 5874 40 20 39  0  0
+0  0      0 339848  25436 382496    0    0     0     0  803 5820 42 14 44  0  0
+0  0      0 339848  25436 382500    0    0     0     0  803 5826 40 16 44  0  0
+0  0      0 339848  25444 382492    0    0     0    12  821 5869 46 11 43  0  0
+0  0      0 339848  25444 382504    0    0     0     0  802 5842 40 18 42  0  0
+0  0      0 339844  25444 382508    0    0     0     0  846 5864 39 19 42  0  0
+0  0      0 339848  25444 382512    0    0     0     0  834 5827 39 18 43  0  0
+0  0      0 339848  25444 382516    0    0     0     0  822 5839 38 19 43  0  0
+0  0      0 339848  25452 382512    0    0     0    12  827 5852 40 19 42  0  0
+0  0      0 339848  25452 382524    0    0     0     0  849 5848 42 17 42  0  0
+0  0      0 339848  25452 382528    0    0     0     0  806 5832 40 18 42  0  0
+0  0      0 339848  25452 382532    0    0     0     0  833 5870 38 20 42  0  0
+0  0      0 339848  25452 382536    0    0     0     0  813 5860 42 17 42  0  0
+0  0      0 339848  25460 382532    0    0     0   116  839 5857 39 19 42  0  0
+0  0      0 339848  25460 382544    0    0     0     0  835 5833 40 19 42  0  0
+0  0      0 339848  25460 382548    0    0     0     0  842 5857 38 19 43  0  0
+0  0      0 339848  25460 382548    0    0     0     0  822 5849 40 19 40  0  0
+1  0      0 339848  25460 382552    0    0     0     0  847 5858 40 21 39  0  0
+1  0      0 339848  25468 382548    0    0     0    12  840 5874 35 23 42  0  0
+3  0      0 339840  25468 382560    0    0     0     0  830 5881 33 23 44  0  0
+3  0      0 339848  25468 382564    0    0     0     0  830 5911 38 21 41  0  0
+2  0      0 339848  25468 382568    0    0     0     0  831 5957 39 21 40  0  0
+1  0      0 339848  25468 382572    0    0     0     0  857 5863 38 21 41  0  0
+0  0      0 339848  25476 382568    0    0     0   280  868 5873 36 23 41  0  0
+0  0      0 339848  25476 382580    0    0     0     0  860 5905 41 18 42  0  0
+0  0      0 339848  25476 382584    0    0     0     0  851 5883 41 19 41  0  0
+0  0      0 339848  25476 382588    0    0     0     0  876 5943 42 21 37  0  0
+0  0      0 339848  25476 382592    0    0     0     0  832 5876 41 19 41  0  0
+2  0      0 339724  25484 382584    0    0     0    36  870 5879 40 24 37  0  0
+0  0      0 339724  25484 382596    0    0     0     0  864 5908 43 20 37  0  0
+0  0      0 339724  25484 382600    0    0     0     0  867 5916 44 18 38  0  0
+0  0      0 339724  25484 382604    0    0     0     0  840 5904 40 18 41  0  0
+0  0      0 339724  25484 382608    0    0     0     0  857 5889 43 18 39  0  0
+0  0      0 339832  25492 382604    0    0     0    12  870 5923 40 19 40  0  0
+0  0      0 339852  25492 382616    0    0     0     0  838 5888 40 19 41  0  0
+0  0      0 339852  25492 382620    0    0     0     0  863 5909 40 22 38  0  0
+0  0      0 339852  25492 382624    0    0     0     0  857 5897 42 21 37  0  0
+0  0      0 339852  25492 382628    0    0     0     0  897 5891 43 18 39  0  0
+0  0      0 339848  25500 382624    0    0     0    12  878 5909 41 18 40  0  0
+0  0      0 339836  25500 382636    0    0     0     0  854 5881 39 20 41  0  0
+
+\end{lstlisting}
+
+\newpage
+
+\subsection{Vmstat tool van systeem zonder patches}
+
+\begin{lstlisting}[caption={Eerste 50 resultaten}, basicstyle=\footnotesize]
+procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+0  0      0 829484   6836  88892    0    0  2562    13  335 1107  9  6 85  0  0
+0  0      0 829220   6836  88896    0    0     0     0  717 1299 26 22 52  0  0
+0  0      0 829220   6836  88900    0    0     0     0  663 1209 30 16 53  0  0
+0  0      0 829220   6844  88904    0    0     0    92  735 1336 37 16 47  0  0
+0  0      0 829296   6844  88904    0    0     0     0  703 1275 28 22 49  0  0
+0  0      0 829400   6844  88908    0    0     0     0  703 1293 28 19 53  0  0
+1  0      0 829420   6844  88912    0    0     0     0  729 1323 30 19 51  0  0
+1  0      0 829416   6844  88916    0    0     0     0  687 1265 28 18 54  0  0
+1  0      0 829060   6852  88920    0    0     0    16  710 1297 29 14 57  0  0
+0  0      0 829420   6852  88924    0    0     0     0  715 1296 28 18 54  0  0
+1  0      0 829344   6852  88928    0    0     0     0  713 1278 29 14 57  0  0
+0  0      0 829344   6852  88932    0    0     0     0  704 1286 33 17 50  0  0
+0  0      0 829360   6852  88936    0    0     0     0  700 1279 26 17 58  0  0
+1  0      0 829364   6860  88940    0    0     0    16  728 1327 29 18 52  0  0
+0  0      0 829348   6860  88944    0    0     0     0  726 1270 25 18 57  0  0
+0  0      0 829348   6860  88948    0    0     0     0  727 1296 27 16 56  0  0
+0  0      0 829240   6860  88952    0    0     0    80  715 1247 31 11 58  0  0
+3  0      0 829220   6860  88952    0    0     0     0  717 1306 29 15 55  0  0
+2  0      0 829004   6868  88956    0    0     0    16  726 1295 29 19 53  0  0
+2  0      0 829004   6868  88960    0    0     0     0  680 1260 24 16 60  0  0
+0  0      0 829240   6868  88964    0    0     0     0  681 1191 22 16 62  0  0
+2  0      0 828880   6868  88968    0    0     0     8  673 1198 18 20 62  0  0
+0  0      0 829240   6868  88972    0    0     0     0  673 1206 22 16 62  0  0
+0  0      0 829224   6876  88976    0    0     0    32  680 1222 22 15 63  0  0
+0  0      0 829096   6876  88980    0    0     0     0  659 1216 24 14 62  0  0
+0  0      0 829096   6876  88984    0    0     0     0  664 1222 27 11 62  0  0
+0  0      0 829096   6876  88988    0    0     0     0  668 1201 20 19 60  0  0
+0  0      0 829096   6876  88992    0    0     0     0  662 1170 20 16 64  0  0
+0  0      0 829112   6884  88996    0    0     0    16  678 1234 22 16 62  0  0
+1  0      0 829116   6884  88996    0    0     0     0  688 1262 29 13 58  0  0
+2  0      0 829004   6884  89000    0    0     0     0  674 1252 29 13 59  0  0
+2  0      0 828824   6884  89004    0    0     0   256  681 1265 26 16 58  0  0
+1  0      0 828972   6884  89008    0    0     0     0  687 1218 24 14 61  0  0
+0  0      0 828972   6892  89012    0    0     0    44  697 1261 25 14 61  0  0
+0  0      0 829044   6892  89016    0    0     0     0  673 1248 26 15 59  0  0
+0  0      0 829048   6892  89020    0    0     0     0  680 1237 23 18 59  0  0
+0  0      0 828904   6892  89024    0    0     0     0  670 1254 30 10 59  0  0
+0  0      0 828904   6892  89028    0    0     0     0  665 1243 30 10 61  0  0
+0  0      0 828904   6900  89032    0    0     0    16  693 1270 23 18 59  0  0
+0  0      0 828904   6900  89036    0    0     0     0  671 1182 20 16 64  0  0
+0  0      0 828840   6900  89040    0    0     0     0  680 1252 21 21 59  0  0
+0  0      0 828848   6900  89040    0    0     0     0  678 1259 29 12 59  0  0
+0  0      0 828848   6900  89044    0    0     0     0  658 1235 27 15 58  0  0
+3  0      0 828844   6908  89048    0    0     0    16  677 1221 20 18 61  0  0
+2  0      0 828628   6908  89052    0    0     0     0  676 1206 23 16 61  0  0
+1  0      0 828864   6908  89056    0    0     0     0  694 1230 21 19 60  0  0
+0  0      0 828776   6908  89060    0    0     0     0  694 1236 26 14 60  0  0
+0  0      0 828776   6908  89064    0    0     0     0  685 1261 29 13 58  0  0
+0  0      0 828796   6916  89068    0    0     0    16  670 1230 27 11 62  0  0
+
+\end{lstlisting}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}

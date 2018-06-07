@@ -52,7 +52,7 @@
 
 \begin{minipage}[t]{0.75\linewidth}
 \VeryHuge \color{HoGentAccent1} \textbf{Studie naar de performantie-impact van Spectre/Meltdown patches op Linux voor een typische workload van een webserver} \color{Black}\\ % Title
-\Huge\textit{Ondertitel (eventueel)}\\[2.4cm] % Subtitle
+%\Huge\textit{Ondertitel (eventueel)}\\[2.4cm] % Subtitle
 \huge \textbf{Willems Karel, Bert Van Vreckem, Karine Van Driessche}\\[0.5cm] % Author(s)
 \huge Hogeschool Gent, Valentin Vaerwyckweg 1, 9000 Gent\\[0.4cm] % University/organization
 \Large \texttt{karel.willems.u7999@student.hogent.be} \\
@@ -76,10 +76,24 @@
 \color{HoGentAccent1} % Navy color for the abstract
 
 \begin{abstract}
-Dit werk is een studie van het performantieverschil van de Meltown- en Spectre-patches op een Linux webserver.
-Er werd een testopstelling opgezet voor gemakkelijk resultaten te genereren met Vagrant en Ansible. Het resultaat is data van een aantal benchmark- en monitoringstools. De resultaten worden onderzocht en er wordt gezien of ze statistisch significant zijn aan de hand van t-testen.\\
-In dit document staat er achtergrond beschreven hoe de spectre/meltdown aanvallen werken en hoe mitigaties de performantie kunnen beïnvloeden.\\
- Deze bachelorproef bevestigd dat de patches wel degelijk performantieverlies met zich meebrengen. Dit is belangrijk voor webmasters die zich afvragen of ze nu meer rekenkracht nodig hebben. De belangrijkste impact zal zijn op werkelijk grootschalige omgevingen zoals cloud-providers, waar zelfs een toename van een paar percent van de belasting extra hardware vereist.
+Dit werk is een studie van het performantieverschil van de Meltdown en Spectre patches op een Linux webserver.
+Om dit uit te testen werd er met Vagrant en Ansible een testopstelling opgezet, om gemakkelijk resultaten te genereren.
+Het resultaat is data van een aantal benchmark en monitoring tools.
+Aan de hand van t-testen worden de resultaten onderzocht, en er wordt gezien of ze statistisch significant zijn.
+
+In deze bachelorproef vind je achtergrond over hoe de Spectre/Meltdown aanvallen werken, en hoe risicobeperkende maatregelen de performantie kunnen be\"invloeden.
+De resultaten duiden aan dat in de meeste applicaties er een significant verschil is.
+Eerst werd er gezien of het processorgebruik tijdens een normale werklast veel verschilt.
+
+Het antwoord was duidelijk, met een verschil van 18 procent.
+De volgende test was op het vlak van responstijd, het verschil was hier redelijk, met 5 procent.
+Redis, een in-memory database verloor maar 3 procent over allerlei andere testen.
+
+Deze bachelorproef bevestigt dat de patches wel degelijk performantieverlies met zich meebrengen. 
+Het performantieverlies voor een webserver is significant, doch niet rampzalig.
+Dit is belangrijk voor webmasters die zich afvragen of ze nu al dan niet meer rekenkracht nodig hebben. De belangrijkste impact zal zijn op werkelijk grootschalige omgevingen zoals cloud-providers, waar zelfs een toename van een paar procenten van de belasting, extra hardware vereist.
+
+De vraag is of de patches nog veel verbeterd kunnen worden, en wat de impact is op het vlak van energieverbruik, dat ook belangrijk is voor cloud-providers.
 
 \end{abstract}
 %----------------------------------------------------------------------------------------
@@ -90,15 +104,15 @@ In dit document staat er achtergrond beschreven hoe de spectre/meltdown aanvalle
 \section*{Introductie}
 \color{black}
 \color{black}
-Be quiet! Found them? In Mercia?! The coconut's tropical! But you are dressed as one… Well, what do you want? Knights of Ni, we are but simple travelers who seek the enchanter who lives beyond these woods.
-
-Well, what do you want? It's only a model. Camelot! We found them. We shall say 'Ni' again to you, if you do not appease us.
-
-The nose? Shut up! Burn her! I am your king. You don't vote for kings.
-
-You can't expect to wield supreme power just 'cause some watery tart threw a sword at you! Well, we did do the nose. I don't want to talk to you no more, you empty-headed animal food trough water! I fart in your general direction! Your mother was a hamster and your father smelt of elderberries! Now leave before I am forced to taunt you a second time!
-
-Why do you think that she is a witch? We want a shrubbery!! I don't want to talk to you no more, you empty-headed animal food trough water! I fart in your general direction! Your mother was a hamster and your father smelt of elderberries! Now leave before I am forced to taunt you a second time!
+Spectre en Meltdown zijn bugs op het vlak van beveiliging dat bestaan in apparaten van de afgelopen 20 jaar.
+Redhat rapporteert dat Meltdown en Spectre tezamen een impact van 0 tot 19 procent
+heeft. Applicaties die vaak systeemoproepen doen zullen meer prestatieverlies hebben.\newline
+De 9de generatie Intel ’Ice Lake’ processors zullen hardwarematige oplossingen hebben, maar deze zijn beschikbaar in 2019.
+\newline
+Nieuwe processors zijn echter duur, dus het is niet vanzelfsprekend om nieuwe te kopen.\newline
+Wie in de markt is voor een nieuwe processor, kan nu kopen of tot 2019 wachten. Deze studie moet duidelijke resultaten geven of er een drastisch verschil is voor webapplicaties.\newline De onderzoeksvraag die moet beantwoord worden in deze studie is:\newline\newline
+''Is er een groot performantieverschil met de Spectre/Meltdown patches op een Linux
+webserver``
 %----------------------------------------------------------------------------------------
 %	GEOLOGY
 %----------------------------------------------------------------------------------------
@@ -107,14 +121,19 @@ Why do you think that she is a witch? We want a shrubbery!! I don't want to talk
 \color{HoGentAccent1} 
 \section*{Experimenten}
 \color{black}
-A newt? Camelot! Why? No, no, no! Yes, yes. A bit. But she's got a wart.
-
-Shut up! I dunno. Must be a king. Who's that then? Look, my liege! On second thoughts, let's not go there. It is a silly place.
-
-Shut up! Will you shut up?! No, no, no! Yes, yes. A bit. But she's got a wart. He hasn't got shit all over him. It's only a model. It's only a model.
-
-Bring her forward! I don't want to talk to you no more, you empty-headed animal food trough water! I fart in your general direction! Your mother was a hamster and your father smelt of elderberries! Now leave 
-
+Het vergelijken wordt vooraf gegaan door een t-test, die duidelijk zal maken of het verschil statistisch significant is. Hiervoor wordt de alpha-waarde als standaard genomen: 0,05. De p-waarde moet kleiner zijn als de alpha-waarde, om met zekerheid te zeggen dat de meetresultaten betrouwbaar zijn.
+\newline\newline
+\noindent\textbf{CPU gebruik.}
+De belasting werd gegenereerd door autobench met 40 verzoeken per seconde voor een totaal van 4500 verzoeken. Het CPU gebruik werd opgeslaan elke seconde voor 90 seconden met vmstat. Het vmstat commando wordt naar de webservers gedelegeerd.
+\newline\newline
+\noindent\textbf{Responstijd.} Responstijd werd verkregen door de latentie te berekenen voor een bepaald aantal van gelijktijdige verbindingen.De gelijktijdige verbindingen lopen uiteen van 20 tot 240 met stappen van 2. De gebruikte tool heet ’autobench’.
+\newline\newline
+\noindent\textbf{Redis.} De resultaten van redis (een 'in memory' database) zijn berekend met ’redis-benchmark’, een hulpprogramma opgenomen in Redis.Het systeem met patches verliest 3,4\% performantie.
+De doorvoersnelheid werd met dezelfde methode berekend als de responstijd (20 tot 240 gelijktijdige verbindingen met stappen van 2).
+\newline\newline
+\textbf{Doorvoersnelheid.}
+Het systeem met de patches heeft een doorvoersnelheid van 54 verzoeken per seconde, het
+systeem zonder patches een doorvoersnelheid van 58 . Dit is een verlies van 7 procent.
 
 
 \color{HoGentAccent1} 
@@ -123,8 +142,8 @@ Bring her forward! I don't want to talk to you no more, you empty-headed animal 
 
 
 \begin{center}\vspace{1cm}
-\includegraphics[width=1.0\linewidth]{cpu_system.png}
-\captionof{figure}{\color{HoGentAccent5} He hasn't got shit all over him. The nose? Where'd you get the coconuts? What do you mean? We shall say 'Ni' again to you, if you do not appease us}
+\includegraphics[width=1.0\linewidth]{cpu_usage.png}
+\captionof{figure}{\color{HoGentAccent5} CPU gebruik}
 \end{center}\vspace{1cm}
 
 %------------------------------------------------
@@ -134,7 +153,10 @@ Bring her forward! I don't want to talk to you no more, you empty-headed animal 
 \color{HoGentAccent1} 
 \section*{Conclusies}
 \color{black}
-on't underestimate the Force. Oh God, my uncle. How am I ever gonna explain this? I suggest you try it again, Luke. This time, let go your conscious self and act on instinct. Don't be too proud of this technological terror you've constructed. The ability to destroy a planet is insignificant next to the power of the Force.
+Uit het onderzoek bleek dat de Meltdown/Spectre patches wel degelijk een performantieverlies introduceren. Vooral processor verbruik stijgt. Voor een webserver is het
+performantieverlies niet drastisch, maar bij grootschalige servers kan 5\% al zeer impactvol zijn.\newline
+In het begin veroorzaakten de patches veel problemen, zoals spontane reboots maar ze zijn nu veel verbeterd met betrekking tot stabiliteit en performantie. De doorvoersnelheid van een normale webserver verliest maar 7 procent. Dat is veel minder dan eerst gedacht, sommigen voorspelden rond de 30 procent.\newline
+Waar het onderzoek geen definitief antwoord op kan geven is de performantie van redis, alhoewel er weinig verschil op zit. Als we naar de responstijd zien, is de server nog perfect bruikbaar met een stijging van 1 milliseconde (van 14ms naar 15ms).
 %----------------------------------------------------------------------------------------
 %	FORTHCOMING RESEARCH
 %----------------------------------------------------------------------------------------
@@ -142,9 +164,8 @@ on't underestimate the Force. Oh God, my uncle. How am I ever gonna explain this
 \section*{Toekomstig onderzoek}
 \color{black}
 
-I care. So, what do you think of her, Han? No! Alderaan is peaceful. We have no weapons. You can't possibly… I have traced the Rebel spies to her. Now she is my only link to finding their secret base.
-
-Kid, I've flown from one side of this galaxy to the other. I've seen a lot of strange stuff, but I've never seen anything to make me believe there's one all-powerful Force controlling everything. There's no mystical energy field that controls my destiny. It's all a lot of simple tricks and nonsense. You are a part of the Rebel Alliance and a traitor! Take her away! 
+De vraag is of de patches nog veel verbeterd kunnen worden, en wat de impact is op het
+vlak van energieverbruik, dat ook belangrijk is voor cloud-providers.
 
 
 %----------------------------------------------------------------------------------------

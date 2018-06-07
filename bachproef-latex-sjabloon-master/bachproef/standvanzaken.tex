@@ -18,9 +18,9 @@
 
 
 
-Redhat rapporteert dat Meltdown en Spectre tezamen een impact van 0 tot 19 percent heeft.
+Redhat rapporteert dat Meltdown en Spectre tezamen een impact van 0 tot 19 procent heeft.
 Applicaties die vaak systeemoproepen doen zullen meer prestatieverlies hebben. 
-De grootste verliezers zijn database workloads die veel gebruik maken van willekeurige data in de cache zoals sysbench, pgbench (voorheen 8 tot 19 percent, nu bijgewerkt met retpoline naar 4 tot 8 percent).
+De grootste verliezers zijn database workloads die veel gebruik maken van willekeurige data in de cache zoals sysbench, pgbench (voorheen 8 tot 19 procent, nu bijgewerkt met retpoline naar 4 tot 8 procent).
 Applicaties die weinig nood hebben aan kernelgeheugen zoals HPC (High Performance Computing) met OpenMP hebben weinig last van Spectre en Meltdown. Het verschil was eerst 2 tot 5 procent maar met betere updates is het gedaald naar 1 tot 2 procent.
 
 
@@ -42,7 +42,7 @@ Applicaties die weinig nood hebben aan kernelgeheugen zoals HPC (High Performanc
 \section{Spectre}
 
 \subsection{Spectre aanval}
-Spectre is geclassificeerd als een 'side channel-aanval'.
+Spectre is geclassificeerd als een 'side channel aanval'.
 Een side channel aanval is een verzameling van aanvallen op een cryptografie apparaat met als doel de geheime sleutel ervan te onthullen.
 
 De aanvaller probeert bepaalde patronen in het systeem te ontdekken door analyse van informatie die is verkregen uit de fysieke implementatie van het systeem. Deze informatie kan bijvoorbeeld timingsanalyse, stroomverbruik, elektromagnetische lekken of zelfs geluid zijn. \parencite{Touhafi2011}
@@ -56,7 +56,7 @@ Het doel van Intel SGX is om het vertrouwensvereiste tussen gebruiker en een clo
 Het biedt een praktische platformabstractie aan om de programmeur te helpen. 
 Het is een soort van beveiligde DRM (Digital Rights Management).
 Intel SGX maakt een container aan die software isoleert van andere software.
-Dit betekent niet dat men Amazon of Intel 100 percent kan vertrouwen (ze kunnen extreem moeilijk garanderen dat ze geen backdoor voor het debuggen van SGX geïnstalleerd hebben).
+Dit betekent niet dat men Amazon of Intel 100 procent kan vertrouwen (ze kunnen extreem moeilijk garanderen dat ze geen backdoor voor het debuggen van SGX geïnstalleerd hebben).
 Een aantal onderzoekers hebben nu met een Spectre aanval data in de Intel SGX kunnen lezen.
 Ze hebben 'SGXPECTRE'  losgelaten op de SGX 'enclave' (enclaves zijn privéregio's van geheugen) om de geheimen er uit te halen.
 
@@ -142,12 +142,12 @@ Ze sturen die opdrachten door de executiepijplijn met meerdere voorwaardelijke b
 Voor elke fysieke kern is er één BPU.
 Dit wil zeggen dat meerdere processen worden uitgevoerd op dezelfde BPU.
 Hoewel dit interessant is voor complexiteit kan het gemakkelijk gemanipuleerd worden.
-Het delen maakt een side-channel aanval mogelijk.
+Het delen maakt een side channel aanval mogelijk.
 
 Op de meeste chips is de BPU samengesteld uit de branch target buffer (BTB) en de directionele predictor.
 Een typische predictor is een simpele enkelvoudige bimodale predictor.
 Een enkelvoudige predictor maakt gebruik van directe mapping en alleen het branch adres als bron.
-Het neemt de \emph{n} laatste bits van een branch instructie adres en mapt het in een tabel met een enkele kolom. In de tabel passen 2\textsuperscript{n} rijen.
+Het neemt de \emph{n}-laatste bits van een branch instructie adres en mapt het in een tabel met een enkele kolom. In de tabel passen 2\textsuperscript{n} rijen.
 Op de Haswell gebaseerde Surface Pro 3 worden de laatste bits van het virtuele adres
 verder gereduceerd door een eenvoudige hash
 functie.
@@ -370,9 +370,9 @@ De onderzoekers hebben alleen maar testen uitgevoerd op Intel-processors, en mee
 Ze hebben AMD-chips niet getest, maar waarschijnlijk zullen ze er ook onder lijden.
 
 Intel heeft gereageerd op de bevindingen en zelfs tezamen gewerkt met de onderzoekers.
-Ze zeggen dat het onderzoek geloofwaardig is en dat de exploit vergelijkbaar is met eerder bekende side-channel aanvallen.
+Ze zeggen dat het onderzoek geloofwaardig is en dat de exploit vergelijkbaar is met eerder bekende side channel aanvallen.
 
-Intel stelt ook vast dat bestaande softwarematige, risicobeperkende maatregelen, zoals side-channel resistente cryptografie, ook effectief zijn tegen de methode in de paper.
+Intel stelt ook vast dat bestaande softwarematige, risicobeperkende maatregelen, zoals side channel resistente cryptografie, ook effectief zijn tegen de methode in de paper.
 
 \subsection{Branch Prediction}
 Oude CPU's voeren één instructie uit per klokcyclus.
@@ -456,50 +456,38 @@ tegen beide aanvallen.
 
 
 \subsection{Statische analyse}
-Statische code analyse wordt gebruikt om code sequenties te analyseren zonder het uit te voeren. Als de analyse, code vindt met kwetsbare sequenties zal het speculatieve executie uitschakelen tot alle code veilig uitgevoerd is.
+Statische code analyse wordt gebruikt om code sequenties te analyseren zonder het uit te voeren. Als de analyse code vindt met kwetsbare sequenties, zal het speculatieve executie uitschakelen tot alle code veilig uitgevoerd is.
 Speculatieve executie wordt gestopt met een geheugenbarrière, ook bekend als een memory fence. Dit zijn extra instructies geschreven in machine code die de compiler dwingen om de instructies 'in order' te draaien.
 
 
 \subsection{KPTI}
-Omdat hardware niet zo gemakkelijk te patchen is, is er behoefte aan
-softwarematige oplossingen totdat nieuwe hardware kan worden geïmplementeerd.
-KPTI of KAISER is een kernelaanpassing
-om de kernel niet in de gebruikersruimte te plaatsen.
-Deze wijziging was bedoeld om side-channel aanvallen te voorkomen
-die KASLR breken. Het is echter ook
-goed voor Meltdown, omdat de mapping naar kernelruimte of fysiek geheugen niet beschikbaar of geldig is 
-in gebruikersruimte. KAISER is beschikbaar in de nieuwe
-releases van de Linux-kernel onder de naam kernel
-pagina tabel isolatie (KPTI). 
+Hardware is alleen maar te patchen via softwarematige oplossingen totdat nieuwe hardware ontworpen kan worden.
+De softwarematige oplossingen zijn in de vorm van microcode.
+Microcode bepaalt de interne werking van een CPU.
+De interne werking zit opgeslagen in een ROM (read-only memory).
+Instructies worden als adressen aan deze ROM aangevoerd.
+De ROM geeft controle signalen aan de andere componenten van de CPU, zoals de ALU (Rekenkundig-logische eenheid).
 
-De patch zal ook
-oudere Linux-kernelversies ondersteunen. Bovendien hebben Windows, Mac OS X en iOS dezelfde functies.
-Hoewel KAISER standaard bescherming biedt tegen
-Meltdown, het heeft nog steeds een aantal beperkingen. Vanwege het ontwerp
-van de x86-architectuur, moeten meerdere bevoorrechte geheugenlocaties
-in de gebruikersruimte worden toegewezen. Deze
-laten een aanvalsoppervlak achter, d.w.z. deze
-geheugenlocaties kunnen nog steeds worden gelezen vanuit de gebruikersruimte. 
-Hoewel deze geheugenlocaties geen geheimen bevatten,
-zoals inloggegevens, kunnen ze nog steeds pointers bevatten.
-Lekken van één pointer kan voldoende zijn om opnieuw KASLR te breken.
-Toch is KAISER momenteel de beste kortetermijnoplossing die
-beschikbaar is, en moet daarom op alle systemen worden ingezet. Zelfs met Meltdown kan KAISER kernelpointers
+KPTI (ookwel PTI of KAISER genoemd) scheidt de kernelruimte van de gebruikersruimte af.
+Deze wijziging was eerst bedoeld om side channel aanvallen te voorkomen, nu is het ook nuttig voor Meltdown.
+
+De nieuwe releases van de Linux-kernel hebben volledige ondersteuning voor KPTI.
+De patch zal ook oudere Linux-kernelversies ondersteunen. 
+Natuurlijk hebben alle populaire besturingssystemen (Windows, Mac OS X, iOS, Android) dezelfde functies.
+
+KPTI laat wel nog een aanvalsoppervlak achter, d.w.z. sommige geheugenlocaties kunnen nog steeds uitgelezen worden vanaf een gebruikersmodus. 
+Deze geheugenlocaties bevatten geen belangrijke informatie zoals paswoorden, maar in het geval dat ze wijzen naar een ander adres via pointers, kunnen ze KPTI breken. 
+
+
+Toch is KPTI momenteel de beste oplossing die beschikbaar is, en moet op alle systemen worden toegepast.
+Zelfs met Meltdown kan KPTI kernelpointers
 vermijden op geheugenlocaties
-die in de gebruikersruimte in kaart zijn gebracht en informatie zouden kunnen lekken. Dit zou 
-trampolinelocaties vereisen voor elke kernel pointer, d.w.z.
-de interrupt handler zou de kernelcode niet rechtstreeks inroepen,
-maar met een trampolinefunctie.
+die in de gebruikersruimte in kaart zijn gebracht, en informatie zouden kunnen lekken. Dit zou 
+trampolinelocaties vereisen voor elke kernel pointer.
 
-De trampolinefunctie mag alleen in de kernel worden toegewezen. Het moet
-willekeurig worden  verdeeld met een andere offset dan de resterende
-kernel. Daarom kan een aanvaller alleen pointers lekken
-naar de trampolinecode, maar niet naar de gerandomiseerde offsets van
-de resterende kernel. Een dergelijke trampolinecode is vereist
-voor elk kernelgeheugen dat nog moet worden toegewezen in
-gebruikersruimte en bevat kerneladressen. Deze aanpak 
-is een wisselwerking tussen prestaties en beveiliging en
-moet worden beoordeeld in toekomstige werkzaamheden.
+Een trampolinefunctie springt in principe naar een instructie en laat die instructie meteen beslissen wat de volgende instructie is.
+Een goed voorbeeld is een 'interrupt': de interrupt handler (een component van de CPU) weet niet echt hoe het met een evenement (bijvoorbeeld een toetsaanslag) moet omgaan, dus het laat de trampolinefunctie beslissen.
+
 
 \section{Spectre patch}
 \subsection{Retpoline}
@@ -593,7 +581,7 @@ Processors gebruiken een hiërarchie van achtereenvolgend sneller wordende cache
 Hoe lager het cacheniveau, hoe sneller de cache, maar hoe kleiner het is. Als een computer twee kernen heeft zal elke kern zijn eigen L1 en L2 cache hebben. Typisch is de L3 cache groot, maar die wordt gedeeld met alle kernen.
 
 Een CPU bestaat uit registers, een Arithmetic Logic Unit (ALU) en een Control Unit. 
-Met de localbus wordt een cache verbindt. De cache verstuurt data naar de register. 
+Met de localbus wordt een cache verbonden. De cache verstuurt data naar de register. 
 De register stuurt data naar de ALU en die stuurt het resultaat naar de register, dan de cache, dan RAM. 
 RAM verzendt het dan naar I/O apparaten of ander geheugen.
 
